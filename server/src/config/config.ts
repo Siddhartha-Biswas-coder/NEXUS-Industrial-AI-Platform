@@ -13,6 +13,10 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
 
     CORS_ORIGIN: z.string(),
+
+    JWT_ACCESS_TOKEN_EXPIRY: z
+        .string()
+        .default("7d"),
 })
 
 const envData = {
@@ -25,6 +29,8 @@ const envData = {
     JWT_SECRET: process.env.JWT_SECRET,
 
     CORS_ORIGIN: process.env.CORS_ORIGIN,
+
+    JWT_ACCESS_TOKEN_EXPIRY: process.env.JWT_ACCESS_TOKEN_EXPIRY,
 }
 
 const parseEnv = envSchema.safeParse(envData);

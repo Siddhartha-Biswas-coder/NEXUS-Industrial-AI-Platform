@@ -2,17 +2,21 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import config from "./config/config.ts";
+import errorHandler from "./middlewares/errorHandler.ts";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/auth.routes.ts";
 
 const app = express();
 
-app.use(express.json());
-app.use(morgan('dev'));
 app.use(cors({
     origin: config.CORS_ORIGIN.split(",").map((url) => url.trim().replace(/\/$/, "")),
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
 }))
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(morgan('dev'));
 
 app.get("/", (req, res) => {
     res.json({ message: "Nexus API is running!" });
@@ -24,5 +28,9 @@ app.get("/api/health", (_, res) => {
         service: "Nexus API"
     })
 })
+
+app.use("/api/auth", authRoutes)
+
+app.use(errorHandler);
 
 export default app;
