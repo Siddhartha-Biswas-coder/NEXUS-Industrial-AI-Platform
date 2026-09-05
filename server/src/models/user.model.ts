@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType, HydratedDocument } from "mongoose";
+import mongoose, { InferSchemaType, HydratedDocument, Model } from "mongoose";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
@@ -36,8 +36,19 @@ const userSchema = new mongoose.Schema(
     }
 )
 
+// Infer document fields
 type User = InferSchemaType<typeof userSchema>;
-type UserDocument = HydratedDocument<User>;
+
+// Custom instance methods
+interface UserMethods {
+    comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+// Full document type
+export type UserDocument = HydratedDocument<User, UserMethods>;
+
+// Tell Mongoose the model has these methods
+type UserModelType = Model<User, {}, UserMethods>;
 
 userSchema.pre("save", async function (this: UserDocument) {
     if (!this.isModified("password")) {
@@ -52,6 +63,7 @@ userSchema.methods.comparePassword = function (
     return bcrypt.compare(candidatePassword, this.password);
 }
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.model<User, UserModelType>("User", userSchema);
 
 export default UserModel;
+
