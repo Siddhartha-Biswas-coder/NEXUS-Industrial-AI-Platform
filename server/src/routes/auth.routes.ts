@@ -9,4 +9,5 @@ router.post("/sign-up",validate(signupSchema), signUpController);
 
 router.post("/login",validate(loginSchema),loginController)
 
+
 export default router

@@ -5,6 +5,7 @@ import config from "./config/config.ts";
 import errorHandler from "./middlewares/errorHandler.ts";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.ts";
+import documentRoutes from "./routes/document.routes.ts";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
     res.json({ message: "Nexus API is running!" });
 });
 
@@ -29,7 +30,9 @@ app.get("/api/health", (_, res) => {
     })
 })
 
+
 app.use("/api/auth", authRoutes)
+app.use("/api/documents", documentRoutes)
 
 app.use(errorHandler);
 
