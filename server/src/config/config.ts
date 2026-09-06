@@ -17,6 +17,17 @@ const envSchema = z.object({
     JWT_ACCESS_TOKEN_EXPIRY: z
         .string()
         .default("7d"),
+
+    EBEDDINGS_IP_ADDRESS: z
+        .string()
+        .default("127.0.0.1"),
+    EBEDDINGS_PORT: z
+        .coerce.number()
+        .default(8000),
+
+    PINECONE_API_KEY: z.string().min(1, "PINECONE_API_KEY is required"),
+
+    PINECONE_INDEX_NAME: z.string().default("nexus-index"),
 })
 
 const envData = {
@@ -31,6 +42,13 @@ const envData = {
     CORS_ORIGIN: process.env.CORS_ORIGIN,
 
     JWT_ACCESS_TOKEN_EXPIRY: process.env.JWT_ACCESS_TOKEN_EXPIRY,
+
+    EBEDDINGS_IP_ADDRESS: process.env.EBEDDINGS_IP_ADDRESS,
+    EBEDDINGS_PORT: process.env.EBEDDINGS_PORT,
+
+    PINECONE_API_KEY: process.env.PINECONE_API_KEY,
+
+    PINECONE_INDEX_NAME: process.env.PINECONE_INDEX_NAME,
 }
 
 const parseEnv = envSchema.safeParse(envData);

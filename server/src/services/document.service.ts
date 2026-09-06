@@ -1,7 +1,7 @@
 import DocumentModel from "../models/document.model.ts";
 import { splitTextIntoChunks, saveChunks } from "./chunk.service.ts";
 import { extractPdfText } from "./pdf.service.ts";
-
+import { indexChunks } from "./vector.service.ts";
 
 interface UploadData {
     title: string;
@@ -37,6 +37,8 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
 
     // Step 5: Save chunks to MongoDB
     await saveChunks(document.id, userId, chunks);
+
+    await indexChunks(document.id, userId, chunks)
 
     // Step 6: Mark document as indexed
     document.status = "indexed";

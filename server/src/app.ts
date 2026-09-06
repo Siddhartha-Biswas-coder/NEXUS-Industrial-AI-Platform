@@ -6,6 +6,7 @@ import errorHandler from "./middlewares/errorHandler.ts";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.ts";
 import documentRoutes from "./routes/document.routes.ts";
+import { testEmbeddingController } from "./controllers/test.controller.ts";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.get("/api/health", (_, res) => {
 
 app.use("/api/auth", authRoutes)
 app.use("/api/documents", documentRoutes)
+app.get("/api/test-embedding",testEmbeddingController)
 
 app.use(errorHandler);
 

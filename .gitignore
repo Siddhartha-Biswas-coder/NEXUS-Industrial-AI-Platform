@@ -1,2 +1,24 @@
-node_modules
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Python
+embedding-service/venv/
+__pycache__/
+*.pyc
+
+# Environment
 .env
+server/.env
+client/.env
+
+# Uploads
+server/uploads/
+
+# Build
+dist/
+build/
+
+# IDE
+.vscode/
