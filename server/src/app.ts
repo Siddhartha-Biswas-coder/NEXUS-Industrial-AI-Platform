@@ -6,7 +6,9 @@ import errorHandler from "./middlewares/errorHandler.ts";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.ts";
 import documentRoutes from "./routes/document.routes.ts";
-import { testEmbeddingController } from "./controllers/test.controller.ts";
+import testRoutes from "./routes/test.routes.ts";
+import chatRoutes from "./routes/chat.routes.ts";
+
 
 const app = express();
 
@@ -34,7 +36,8 @@ app.get("/api/health", (_, res) => {
 
 app.use("/api/auth", authRoutes)
 app.use("/api/documents", documentRoutes)
-app.get("/api/test-embedding",testEmbeddingController)
+app.use("/api",testRoutes)
+app.use("/api/chat", chatRoutes);
 
 app.use(errorHandler);
 

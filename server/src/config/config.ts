@@ -28,6 +28,16 @@ const envSchema = z.object({
     PINECONE_API_KEY: z.string().min(1, "PINECONE_API_KEY is required"),
 
     PINECONE_INDEX_NAME: z.string().default("nexus-index"),
+
+    LLM_PROVIDER: z.enum(["ollama", "groq", "openai"]).default("ollama"),
+
+    OLLAMA_URL: z.string().default("http://127.0.0.1:11434"),
+
+    GROQ_API_KEY: z.string().optional(),
+
+    OPENAI_API_KEY: z.string().optional(),
+
+    LLM_MODEL: z.string().default("llama3.2:3b"),
 })
 
 const envData = {
@@ -49,6 +59,16 @@ const envData = {
     PINECONE_API_KEY: process.env.PINECONE_API_KEY,
 
     PINECONE_INDEX_NAME: process.env.PINECONE_INDEX_NAME,
+
+    LLM_PROVIDER: process.env.LLM_PROVIDER,
+
+    OLLAMA_URL: process.env.OLLAMA_URL,
+
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+
+    LLM_MODEL: process.env.LLM_MODEL,
 }
 
 const parseEnv = envSchema.safeParse(envData);

@@ -1,17 +1,41 @@
 import { Request, Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler.ts";
-import { generateEmbedding } from "../services/embedding.service.ts";
+import ApiResponse from "../utils/ApiResponse.ts";
+import { llm } from "../services/llm/index.ts";
+import { retrievedRelevantChunks } from "../services/retrieval.service.ts";
+import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 
-export const testEmbeddingController = asyncHandler(
+// Test the LLM independently
+export const testLLMController = asyncHandler(
   async (_req: Request, res: Response) => {
-    const embedding = await generateEmbedding(
-      "We care if you can debug when things break."
+    const answer = await llm.generate({
+      prompt: "Answer in exactly one sentence: What is debugging?",
+    });
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { answer },
+        "LLM is working"
+      )
+    );
+  }
+);
+
+// Test Pinecone retrieval independently
+export const testRetrievalController = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const chunks = await retrievedRelevantChunks(
+      "What did Aarav learn during his internship?",
+      req.user!.id
     );
 
-    return res.json({
-      success: true,
-      dimensions: embedding.length,
-      preview: embedding.slice(0, 5),
-    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        chunks,
+        "Retrieved relevant chunks"
+      )
+    );
   }
 );
