@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose, { InferSchemaType,HydratedDocument } from "mongoose";
 
 const documentSchema = new mongoose.Schema({
     title: {
@@ -10,6 +10,20 @@ const documentSchema = new mongoose.Schema({
     originalName: {
         type: String,
         required: true,
+    },
+
+    extractedText: {
+        type: String,
+        default: "",
+    },
+
+    pageCount: {
+        type: Number,
+        default: 0,
+    },
+
+    processedAt: {
+        type: Date,
     },
 
     filePath: {
@@ -43,6 +57,7 @@ const documentSchema = new mongoose.Schema({
 })
 
 export type Document = InferSchemaType<typeof documentSchema>
+export type DocumentDocument = HydratedDocument<Document>;
 
 const DocumentModel = mongoose.model("Document", documentSchema)
 

@@ -4,6 +4,7 @@ import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 import ApiError from "../errors/ApiError.ts";
 import ApiResponse from "../utils/ApiResponse.ts";
 import { uploadDocumentService } from "../services/document.service.ts";
+import { sanitizeDocument } from "../utils/sanitizeDocument.ts";
 
 export const uploadDocumentController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
@@ -22,7 +23,7 @@ export const uploadDocumentController = asyncHandler(
         return res.status(201).json(
             new ApiResponse(
                 201,
-                document,
+                { document: sanitizeDocument(document) },
                 "Document uploaded successfully"
             )
         );
