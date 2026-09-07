@@ -11,15 +11,15 @@ export const signUpController = asyncHandler(async (req: Request, res: Response)
 
     res.cookie("token", result.token, cookieOptions)
 
-    return res.status(201).json(new ApiResponse(201,result,"User created successfully"))
+    return res.status(201).json(new ApiResponse(201, result, "User created successfully"))
 })
 
-export const loginController = asyncHandler(async (req:Request, res:Response)=>{
-    const {email,password} = req.body;
+export const loginController = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
 
-    const result = await authService.loginService({email,password})
+    const result = await authService.loginService({ email, password })
 
-    res.cookie("token",result.token,cookieOptions);
+    res.cookie("token", result.token, cookieOptions);
 
-    return res.status(200).json(new ApiResponse(200,result,"User logged in successfully"))
+    return res.status(200).json(new ApiResponse(200, result, "User logged in successfully"))
 })

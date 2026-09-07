@@ -1,11 +1,13 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import Providers from "./app/providers.tsx";
+import App from "./app/App.tsx";
+import "./styles/globals.css";
 
-
-const main = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
-
-export default main
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <Providers>
+      <App />
+    </Providers>
+  </React.StrictMode>,
+);
