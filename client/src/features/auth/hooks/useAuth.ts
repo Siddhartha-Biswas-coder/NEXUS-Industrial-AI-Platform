@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../../shared/hooks";
 
-import { loginService, signUpService, logoutService } from "../services/auth.service";
+import { loginService, signUpService, getCurrentUserService, logoutService } from "../services/auth.service";
 import {
     loginSuccess,
     logoutSuccess,
@@ -47,6 +47,19 @@ export const useAuth = () => {
         }
     }
 
+    const checkAuth = async () => {
+        dispatch(setLoading(true));
+
+        try {
+            const user = await getCurrentUserService();
+            dispatch(loginSuccess(user))
+        } catch {
+            dispatch(logoutSuccess())
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
     const logoutUser = async () => {
         try {
             await logoutService();
@@ -60,6 +73,7 @@ export const useAuth = () => {
         ...auth,
         signupUser,
         loginUser,
-        logoutUser
+        logoutUser,
+        checkAuth
     }
 }

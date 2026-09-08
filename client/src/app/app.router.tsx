@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import RootLayout from "./RootLayout";
 import LandingPage from "../features/landing/pages/LandingPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import SignupPage from "../features/auth/pages/SignupPage";
@@ -13,36 +14,41 @@ import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <LandingPage />,
-  },
-  {
-    element: <PublicRoute />,
+    element: <RootLayout />,
     children: [
       {
-        path: "/login",
-        element: <LoginPage />,
+        path: "/",
+        element: <LandingPage />,
       },
       {
-        path: "/signup",
-        element: <SignupPage />,
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/dashboard",
-        element: <DashboardPage />,
-      },
-      {
-        path: "/chat",
-        element: <ChatPage />,
+        element: <PublicRoute />,
+        children: [
+          {
+            path: "/login",
+            element: <LoginPage />,
+          },
+          {
+            path: "/signup",
+            element: <SignupPage />,
+          },
+        ],
       },
       {
-        path: "/documents",
-        element: <DocumentsPage />,
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "/chat",
+            element: <ChatPage />,
+          },
+          {
+            path: "/documents",
+            element: <DocumentsPage />,
+          },
+        ],
       },
     ],
   },

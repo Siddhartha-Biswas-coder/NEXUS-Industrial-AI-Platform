@@ -17,10 +17,10 @@ export const loginService = async (
     return response.data.data;
 }
 
-// export const getCurrentUser = async () => {
-//     const response = await api.get("/auth/api");
-//     return response.data.data;
-// }
+export const getCurrentUserService = async () => {
+    const response = await api.get("/auth/me");
+    return response.data.data;
+}
 
 export const logoutService = async (): Promise<void> => {
     await api.post("/auth/logout");

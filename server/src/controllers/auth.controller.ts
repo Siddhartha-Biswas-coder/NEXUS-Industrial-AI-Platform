@@ -23,3 +23,11 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 
     return res.status(200).json(new ApiResponse(200, result, "User logged in successfully"))
 })
+
+export const getMeController = asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.getMeService(req.user!.id);
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "Current user fetched successfully")
+    )
+})

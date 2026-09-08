@@ -65,3 +65,13 @@ export const loginService = async ({ email, password }: LoginData) => {
         token
     }
 }
+
+export const getMeService = async(userId:string) => {
+    const user = await UserModel.findById(userId);
+
+    if(!user){
+        throw new ApiError(404, "User not found")
+    }
+
+    return sanitizeUser(user)
+}
