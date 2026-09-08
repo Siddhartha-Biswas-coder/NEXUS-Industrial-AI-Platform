@@ -1,23 +1,27 @@
 import api from "../../../shared/lib/axios";
 
-import type { LoginPayload, SignupPayload } from "../types";
+import type { LoginData, SignupData, AuthResponse } from "../state/types";
 
-export const login = async (payload: LoginPayload) => {
-    const response = await api.post("/auth/login", payload);
-    return response.data;
+
+export const signUpService = async (
+    data: SignupData
+): Promise<AuthResponse> => {
+    const response = await api.post("/auth/sign-up", data);
+    return response.data.data;
 }
 
-export const signUp = async (payload: SignupPayload) => {
-    const response = await api.post("/auth/signup", payload);
-    return response.data;
+export const loginService = async (
+    data: LoginData
+): Promise<AuthResponse> => {
+    const response = await api.post("/auth/login", data);
+    return response.data.data;
 }
 
-export const getCurrentUser = async () => {
-    const response = await api.get("/auth/api");
-    return response.data;
-}
+// export const getCurrentUser = async () => {
+//     const response = await api.get("/auth/api");
+//     return response.data.data;
+// }
 
-export const logout = async () => {
-    const response = await api.post("/auth/logout");
-    return response.data;
+export const logoutService = async (): Promise<void> => {
+    await api.post("/auth/logout");
 }

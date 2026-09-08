@@ -1,13 +1,65 @@
-import { useAppDispatch } from "../../../shared/hooks/useAppDispatch";
-import { useAppSelector } from "../../../shared/hooks/useAppSelector";
+import { useNavigate } from "react-router-dom";
+
+import { useAppDispatch, useAppSelector } from "../../../shared/hooks";
+
+import { loginService, signUpService, logoutService } from "../services/auth.service";
+import {
+    loginSuccess,
+    logoutSuccess,
+    setLoading,
+} from "../state/authSlice";
+
+import type { LoginData, SignupData } from "../state/types";
 
 export const useAuth = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
-    const auth = useAppSelector((state) => state.auth)
+    const auth = useAppSelector((state) => state.auth);
+
+    const signupUser = async (data: SignupData) => {
+        dispatch(setLoading(true));
+
+        try {
+            const result = await signUpService(data);
+
+            dispatch(loginSuccess(result.user));
+
+            navigate("/dashboard");
+        } catch (error) {
+            dispatch(setLoading(false));
+            throw error;
+        }
+    }
+
+    const loginUser = async (data: LoginData) => {
+        dispatch(setLoading(true));
+
+        try {
+            const result = await loginService(data);
+
+            dispatch(loginSuccess(result.user));
+
+            navigate("/dashboard");
+        } catch (error) {
+            dispatch(setLoading(false));
+            throw error;
+        }
+    }
+
+    const logoutUser = async () => {
+        try {
+            await logoutService();
+        } finally {
+            dispatch(logoutSuccess());
+            navigate("/")
+        }
+    }
 
     return {
-        dispatch,
-        ...auth
+        ...auth,
+        signupUser,
+        loginUser,
+        logoutUser
     }
 }
