@@ -21,8 +21,16 @@ export const useDocuments = () => {
         }
     }, []);
 
-    const upload = async (formData: FormData) => {
-        const newDocument = await uploadDocumentService(formData);
+    const upload = async (
+        file: File,
+        title: string,
+        onProgress?: (progress: number) => void
+    ) => {
+        const newDocument = await uploadDocumentService(
+            file,
+            title,
+            onProgress
+        );
 
         setDocuments((prev) => [newDocument, ...prev]);
 

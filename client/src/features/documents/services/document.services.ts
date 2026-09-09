@@ -16,11 +16,27 @@ export const getDocumentsService = async (): Promise<Document[]> => {
 }
 
 export const uploadDocumentService = async (
-    formData: FormData,
+    file: File,
+    title: string,
+    onProgress?: (progress: number) => void
 ): Promise<Document> => {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("title", title);
+
+
     const response = await api.post("/documents/upload", formData, {
         headers: {
             "Content-Type": "multipart/form-data"
+        },
+
+        onUploadProgress: (event) => {
+            if (!event.total) return;
+
+            const progress = Math.round((event.loaded * 100) / event.total);
+
+            onProgress?.(progress)
         }
     })
 
