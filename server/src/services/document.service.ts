@@ -1,3 +1,4 @@
+import type { Express } from "express";
 import DocumentModel from "../models/document.model.ts";
 import { splitTextIntoChunks, saveChunks } from "./chunk.service.ts";
 import { extractPdfText } from "./pdf.service.ts";
@@ -47,4 +48,11 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
 
     return document;
 
+}
+
+export const getDocumentsService = async (userId: string) => {
+    return await DocumentModel.find({ owner: userId }).select(
+        "title originalName fileSize status createdAt processedAt pageCount"
+    )
+        .sort({ createdAt: -1 })
 }

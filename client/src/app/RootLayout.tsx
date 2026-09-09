@@ -7,7 +7,7 @@ const RootLayout = () => {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   if (loading) {
     return (

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../../shared/hooks";
@@ -17,7 +18,7 @@ export const useAuth = () => {
 
     const auth = useAppSelector((state) => state.auth);
 
-    const signupUser = async (data: SignupData) => {
+    const signupUser = useCallback(async (data: SignupData) => {
         dispatch(setLoading(true));
 
         try {
@@ -30,9 +31,9 @@ export const useAuth = () => {
             dispatch(setLoading(false));
             throw error;
         }
-    }
+    }, [dispatch, navigate]);
 
-    const loginUser = async (data: LoginData) => {
+    const loginUser = useCallback(async (data: LoginData) => {
         dispatch(setLoading(true));
 
         try {
@@ -45,29 +46,29 @@ export const useAuth = () => {
             dispatch(setLoading(false));
             throw error;
         }
-    }
+    }, [dispatch, navigate]);
 
-    const checkAuth = async () => {
+    const checkAuth = useCallback(async () => {
         dispatch(setLoading(true));
 
         try {
             const user = await getCurrentUserService();
-            dispatch(loginSuccess(user))
+            dispatch(loginSuccess(user));
         } catch {
-            dispatch(logoutSuccess())
+            dispatch(logoutSuccess());
         } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    const logoutUser = async () => {
+    const logoutUser = useCallback(async () => {
         try {
             await logoutService();
         } finally {
             dispatch(logoutSuccess());
-            navigate("/")
+            navigate("/");
         }
-    }
+    }, [dispatch, navigate]);
 
     return {
         ...auth,
@@ -75,5 +76,5 @@ export const useAuth = () => {
         loginUser,
         logoutUser,
         checkAuth
-    }
-}
+    };
+};
