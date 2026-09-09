@@ -16,32 +16,34 @@
 
 **Nexus** bridges the gap between massive unstructured engineering documentation and actionable insights. Instead of manually navigating through hundreds of technical PDFs, maintenance manuals, standard operating procedures (SOPs), or research papers, Nexus enables engineers and operators to query their documentation using natural language.
 
-Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, and stores vectors in **Pinecone** for sub-100ms similarity search and zero-hallucination contextual responses with exact source citations.
+Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, stores vectors in **Pinecone** for sub-100ms similarity search, and presents zero-hallucination contextual responses with exact source citations.
 
 ---
 
 ## ✨ Key Features
 
-### ⚡ RAG & Semantic Vector Search
+### 💬 RAG AI Assistant & Vector Search
 * **LangChain Semantic Chunking**: Intelligently splits long-form technical PDFs using `RecursiveCharacterTextSplitter`.
-* **FastAPI Local Embedding Microservice**: Uses HuggingFace's `sentence-transformers/all-MiniLM-L6-v2` to generate 384-dimensional dense vectors.
-* **Pinecone Vector Database**: High-speed cosine similarity indexing for fast vector lookup.
-* **Grounded Source Citations**: Trace responses back to specific document chunks and page numbers.
+* **FastAPI Local Embedding Microservice**: Generates 384-dimensional dense vectors using HuggingFace's `sentence-transformers/all-MiniLM-L6-v2`.
+* **Pinecone Vector Database**: High-speed cosine similarity indexing for instant vector lookup.
+* **Grounded Source Citations**: Trace every AI answer directly back to specific document IDs, chunk indices, and vector relevance score percentages.
+* **Interactive AI Chat Interface**: Cursor & Perplexity inspired chat experience with Framer Motion message entrance animations, live typing indicators, glowing action buttons, and keyboard shortcuts (`Enter` / `Shift+Enter`).
 
-### 📄 Document Intelligence
-* **PDF Upload & Extraction**: Asynchronous PDF file parsing via `pdf-parse` and `multer`.
-* **Metadata & Storage**: Dual storage model with chunk payload in MongoDB Atlas and vector embeddings in Pinecone.
-* **Document Vault**: View uploaded files, indexing statuses, vector namespace details, and total chunk counts.
+### 📄 Document Intelligence & Pipeline
+* **PDF Upload & Parsing**: Asynchronous PDF file extraction via `pdf-parse` and `multer`.
+* **Live Pipeline Tracking**: Real-time status lifecycle (`uploaded` ➔ `processing` ➔ `indexed` or `failed`) with automatic background polling.
+* **Dual Storage Architecture**: Document metadata & text chunk payloads in MongoDB Atlas paired with vector embeddings in Pinecone.
+* **Document Vault**: Manage uploaded files, file sizes, vector namespaces, and processing statuses.
 
 ### 🔐 Security & Authentication
 * **JWT & Cookie Security**: Authentication tokens delivered safely via `HTTP-Only` cookies.
 * **Session Persistence**: Automated background session verification (`/auth/me`) keeping active sessions seamlessly logged in.
 * **Route Guards**: Client-side `PublicRoute` and `ProtectedRoute` guards for route protection.
 
-### 🎨 Modern SaaS Interface
-* **Glassmorphism Aesthetic**: Dark theme matching premium SaaS design systems (`bg-[#090a0f]`).
-* **Framer Motion Animations**: Micro-interactions, smooth page transitions, and subtle entrance motion.
-* **Responsive Layouts**: Fully responsive interface optimized across mobile, tablet, and desktop viewports.
+### 🎨 Linear & Cursor Inspired SaaS UI
+* **Glassmorphism Aesthetic**: Dark theme (`bg-[#090a0f]`) with subtle backdrop blur, glowing cyan halos, and dark zinc cards.
+* **Interactive Upload Zone**: Large glowing cyan drop zone, hardware-accelerated animated SVG dashed drag borders, floating Framer Motion upload icon, hover glow button, spring progress bar, and glowing emerald checkmark success state.
+* **Responsive Layouts**: Modern, mobile-responsive layout across all desktop and mobile viewports.
 
 ---
 
@@ -64,9 +66,9 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
            ▼                                                                   ▼
 ┌─────────────────────────────┐                                     ┌────────────────────┐
 │ FastAPI Embedding Service   │                                     │   MongoDB Atlas    │
-│ (all-MiniLM-L6-v2 Vectors)  │                                     │  (Users & Chunks)  │
-└──────────┬──────────────────┘                                     └────────────────────┘
-           │ 384-dim Vectors
+│ (all-MiniLM-L6-v2 Vectors)  │                                     │ (Users, Docs,      │
+└──────────┬──────────────────┘                                     │  Chunks Data)      │
+           │ 384-dim Vectors                                        └────────────────────┘
            ▼
 ┌─────────────────────────────┐
 │    Pinecone Vector DB       │
@@ -96,6 +98,9 @@ nexus/
 │   ├── src/
 │   │   ├── app/                # App router, root layout, and route guards
 │   │   ├── features/           # Feature modules (auth, chat, dashboard, documents, landing)
+│   │   │   ├── auth/           # Login & Signup flows with Redux state
+│   │   │   ├── chat/           # RAG Chat interface, ChatWindow, ChatInput, SourceCard
+│   │   │   └── documents/      # UploadZone, DocumentList, DocumentCard, useDocuments
 │   │   ├── shared/             # Custom hooks, Redux store, and reusable utilities
 │   │   └── styles/             # Global CSS and Tailwind design tokens
 │   └── package.json
@@ -106,8 +111,8 @@ nexus/
 │   │   ├── controllers/        # Express controllers (auth, documents, chat)
 │   │   ├── middlewares/        # Authentication, validation, and error middlewares
 │   │   ├── models/             # Mongoose schemas (User, Document, Chunk)
-│   │   ├── routes/             # Router endpoints
-│   │   ├── services/           # Business logic (RAG ingestion, embedding call, vector search)
+│   │   ├── routes/             # Router endpoints (auth, documents, chat)
+│   │   ├── services/           # Business logic (RAG ingestion, vector search, Q&A)
 │   │   └── validators/         # Zod schemas
 │   └── package.json
 │
@@ -132,8 +137,13 @@ nexus/
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :---: |
 | `POST` | `/api/documents/upload` | Upload PDF, parse text, chunk, embed & index into Pinecone | ✅ |
-| `GET` | `/api/documents` | List uploaded user documents | ✅ |
+| `GET` | `/api/documents` | List uploaded user documents & statuses (`uploaded`, `processing`, `indexed`, `failed`) | ✅ |
 | `GET` | `/api/documents/:id/chunks` | Retrieve chunk details & debugging information | ✅ |
+
+### AI Assistant Chat (`/api/chat`)
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `POST` | `/api/chat` | Send question, retrieve relevant document vector chunks, & generate grounded answer with citations | ✅ |
 
 ---
 
