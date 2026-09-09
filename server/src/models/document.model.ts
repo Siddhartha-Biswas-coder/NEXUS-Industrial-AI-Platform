@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType,HydratedDocument } from "mongoose";
+import mongoose, { InferSchemaType, HydratedDocument } from "mongoose";
 
 const documentSchema = new mongoose.Schema({
     title: {
@@ -49,7 +49,7 @@ const documentSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ["uploaded", "processing", "indexed"],
+        enum: ["uploaded", "processing", "indexed", "failed"],
         default: "uploaded",
     }
 }, {

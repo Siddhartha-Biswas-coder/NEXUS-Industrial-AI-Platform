@@ -21,32 +21,39 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
         owner: userId,
         status: "uploaded"
     })
+    try {
 
-    // Step 2: Extract text from the uploaded PDF
-    const parsed = await extractPdfText(file.path)
+        document.status = "processing";
+        await document.save();
 
-    // Step 3: Store extracted data
-    document.extractedText = parsed.text;
-    document.pageCount = parsed.pages;
-    document.processedAt = new Date();
-    document.status = "processing";
+        // Step 2: Extract text from the uploaded PDF
+        const parsed = await extractPdfText(file.path)
 
-    await document.save();
+        // Step 3: Store extracted data
+        document.extractedText = parsed.text;
+        document.pageCount = parsed.pages;
+        document.processedAt = new Date();
+        await document.save();
 
-    // Step 4: Split text into chunks
-    const chunks = await splitTextIntoChunks(parsed.text);
+        // Step 4: Split text into chunks
+        const chunks = await splitTextIntoChunks(parsed.text);
 
-    // Step 5: Save chunks to MongoDB
-    await saveChunks(document.id, userId, chunks);
+        // Step 5: Save chunks to MongoDB
+        await saveChunks(document.id, userId, chunks);
 
-    await indexChunks(document.id, userId, chunks)
+        await indexChunks(document.id, userId, chunks)
 
-    // Step 6: Mark document as indexed
-    document.status = "indexed";
+        // Step 6: Mark document as indexed
+        document.status = "indexed";
 
-    await document.save()
+        await document.save()
 
-    return document;
+        return document;
+    } catch (error) {
+        document.status = "failed";
+        await document.save()
+        throw error;
+    }
 
 }
 

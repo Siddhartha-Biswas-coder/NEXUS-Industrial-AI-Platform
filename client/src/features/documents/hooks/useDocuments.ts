@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     getDocumentsService,
     uploadDocumentService,
@@ -8,6 +8,7 @@ import {
 export const useDocuments = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
+    const pollingRef = useRef<number | null>(null);
 
     const fetchDocuments = useCallback(async () => {
         try {
@@ -26,19 +27,38 @@ export const useDocuments = () => {
         title: string,
         onProgress?: (progress: number) => void
     ) => {
-        const newDocument = await uploadDocumentService(
-            file,
-            title,
-            onProgress
-        );
+        const newDocument = await uploadDocumentService(file, title, onProgress);
 
         setDocuments((prev) => [newDocument, ...prev]);
+
+        if (!pollingRef.current) {
+            pollingRef.current = window.setInterval(async () => {
+                const latest = await getDocumentsService();
+
+                setDocuments(latest);
+
+                const stillProcessing = latest.some(
+                    (doc) => doc.status === "uploaded" || doc.status === "processing"
+                );
+
+                if (!stillProcessing && pollingRef.current) {
+                    clearInterval(pollingRef.current);
+                    pollingRef.current = null;
+                }
+            }, 2000);
+        }
 
         return newDocument;
     };
 
     useEffect(() => {
         fetchDocuments();
+
+        return () => {
+            if (pollingRef.current) {
+                clearInterval(pollingRef.current)
+            }
+        }
     }, [fetchDocuments]);
 
     return {
