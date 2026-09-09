@@ -1,12 +1,19 @@
 import { useRef, useState } from "react";
-import { useDocuments } from "../hooks/useDocuments";
 import { CheckCircle2, Upload, FileText, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Document } from "../services/document.services";
 
-const UploadZone = () => {
+interface UploadZoneProps {
+  upload: (
+    file: File,
+    title: string,
+    onProgress?: (progress: number) => void,
+  ) => Promise<Document>;
+  refresh: () => Promise<void>;
+}
+
+const UploadZone = ({ upload, refresh }: UploadZoneProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { upload, refresh } = useDocuments();
 
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -124,7 +131,11 @@ const UploadZone = () => {
             ) : (
               <motion.div
                 animate={{ y: [0, -6, 0] }}
-                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut",
+                }}
                 className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-500/40 bg-linear-to-b from-cyan-500/25 to-cyan-500/5 shadow-[0_0_35px_rgba(6,182,212,0.3)]"
               >
                 <div className="absolute inset-0 rounded-2xl bg-cyan-400/20 blur-md" />
@@ -137,7 +148,9 @@ const UploadZone = () => {
                 {progress === 100 ? "Upload Complete!" : "Uploading PDF..."}
               </h2>
               <p className="text-xs text-zinc-400 font-mono">
-                {progress === 100 ? "Processing document vector embeddings..." : `${progress}% completed`}
+                {progress === 100
+                  ? "Processing document vector embeddings..."
+                  : `${progress}% completed`}
               </p>
             </div>
 
@@ -165,7 +178,11 @@ const UploadZone = () => {
           >
             <motion.div
               animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+              transition={{
+                repeat: Infinity,
+                duration: 3.5,
+                ease: "easeInOut",
+              }}
               className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-500/30 bg-linear-to-b from-cyan-500/20 to-cyan-500/5 shadow-[0_0_30px_rgba(6,182,212,0.2)] group-hover:scale-105 group-hover:border-cyan-400/60 group-hover:shadow-[0_0_45px_rgba(6,182,212,0.35)] transition-all duration-300"
             >
               <div className="absolute inset-0 rounded-2xl bg-cyan-400/10 blur-md group-hover:bg-cyan-400/25 transition-all" />
@@ -208,4 +225,3 @@ const UploadZone = () => {
 };
 
 export default UploadZone;
-

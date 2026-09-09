@@ -1,9 +1,15 @@
 import DocumentCard from "./DocumentCard";
-import { useDocuments } from "../hooks/useDocuments";
+import type { Document } from "../services/document.services";
 
-export default function DocumentList() {
-  const { documents, loading } = useDocuments();
+interface DocumentListProps {
+  documents: Document[];
+  loading: boolean;
+}
 
+export default function DocumentList({
+  documents,
+  loading,
+}: DocumentListProps) {
   if (loading) {
     return (
       <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-8 text-center text-zinc-400">
@@ -16,9 +22,7 @@ export default function DocumentList() {
     <section className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">
-            All Documents
-          </h2>
+          <h2 className="text-xl font-bold text-white">All Documents</h2>
 
           <p className="text-sm text-zinc-400">
             Your uploaded technical documents

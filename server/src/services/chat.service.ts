@@ -10,14 +10,20 @@ interface ChatResponse {
   }[];
 }
 
-export const askQuestion = async (
-  question: string,
-  userId: string
-): Promise<ChatResponse> => {
+interface ChatData {
+  question: string;
+  userId: string;
+}
+
+export const askQuestion = async ({
+  question,
+  userId,
+}: ChatData): Promise<ChatResponse> => {
   // Retrieve relevant chunks
   const matches = await retrievedRelevantChunks(question, userId);
 
   const context = matches
+    .slice(0, 5)
     .map((chunk) => chunk.content)
     .join("\n\n");
 

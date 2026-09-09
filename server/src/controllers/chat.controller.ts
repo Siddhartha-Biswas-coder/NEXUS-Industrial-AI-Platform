@@ -9,7 +9,10 @@ export const chatController = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { question } = chatSchema.parse(req.body);
 
-    const result = await askQuestion(question, req.user!.id);
+    const result = await askQuestion({
+      question,
+      userId: req.user!.id
+    });
 
     return res.status(200).json(
       new ApiResponse(
