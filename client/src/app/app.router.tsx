@@ -11,6 +11,7 @@ import DocumentsPage from "../features/documents/pages/DocumentsPage";
 
 import PublicRoute from "./PublicRoute";
 import ProtectedRoute from "./ProtectedRoute";
+import AppLayout from "../features/dashboard/components/AppLayout";
 
 export const router = createBrowserRouter([
   {
@@ -37,16 +38,12 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            path: "/dashboard",
-            element: <DashboardPage />,
-          },
-          {
-            path: "/chat",
-            element: <ChatPage />,
-          },
-          {
-            path: "/documents",
-            element: <DocumentsPage />,
+            element: <AppLayout />,
+            children: [
+              { path: "/dashboard", element: <DashboardPage /> },
+              { path: "/documents", element: <DocumentsPage /> },
+              { path: "/chat", element: <ChatPage /> },
+            ],
           },
         ],
       },

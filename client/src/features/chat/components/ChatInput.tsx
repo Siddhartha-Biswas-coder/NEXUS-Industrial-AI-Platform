@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { SendHorizonal, Loader2 } from "lucide-react";
 
-import { useChat } from "../hooks/useChat";
 import useConversations from "../hooks/useConversations";
 
-export default function ChatInput() {
+interface ChatInputProps {
+  sendMessage: (question: string, conversationId?: string) => Promise<void>;
+  loading: boolean;
+}
+
+export default function ChatInput({
+  sendMessage,
+  loading,
+}: ChatInputProps) {
   const [question, setQuestion] = useState("");
 
-  const { sendMessage, loading } = useChat();
   const { activeConversation, createNewConversation } = useConversations();
 
   const handleSend = async () => {
@@ -22,7 +28,6 @@ export default function ChatInput() {
 
       if (!conversationId) {
         const conversation = await createNewConversation();
-
         conversationId = conversation._id;
       }
 
