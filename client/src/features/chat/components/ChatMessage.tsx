@@ -2,6 +2,7 @@ import type { Message } from "../state/types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
 import { Sparkles, User, BookOpen } from "lucide-react";
+import TypingText from "./TypingText";
 
 interface ChatMessageProps {
   message: Message;
@@ -43,7 +44,13 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           </div>
         )}
 
-        <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+        {isUser ? (
+          <p className="whitespace-pre-wrap leading-relaxed">
+            {message.content}
+          </p>
+        ) : (
+          <TypingText text={message.content} />
+        )}
 
         {!isUser && message.sources && message.sources.length > 0 && (
           <div className="mt-4 pt-4 border-t border-zinc-800/80 space-y-2.5">
@@ -63,4 +70,3 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     </motion.div>
   );
 }
-

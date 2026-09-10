@@ -7,9 +7,10 @@ import { askQuestion } from "../services/chat.service.ts";
 
 export const chatController = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { question } = chatSchema.parse(req.body);
+    const { conversationId, question } = chatSchema.parse(req.body);
 
     const result = await askQuestion({
+      conversationId,
       question,
       userId: req.user!.id
     });

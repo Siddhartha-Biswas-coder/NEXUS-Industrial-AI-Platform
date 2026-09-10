@@ -35,7 +35,8 @@ export default function ChatWindow({ messages, loading }: ChatWindowProps) {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-              className="absolute -inset-4 rounded-full border border-dashed border-cyan-500/30"
+              className="absolute -inset-4 round
+              ed-full border border-dashed border-cyan-500/30"
             />
             <motion.div
               animate={{ scale: [1, 1.08, 1] }}

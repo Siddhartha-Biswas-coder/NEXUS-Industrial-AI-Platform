@@ -1,3 +1,6 @@
+
+import ConversationModel from "../models/conversation.model.ts";
+import MessageModel from "../models/message.model.ts";
 import { llm } from "./llm/index.ts";
 import { retrievedRelevantChunks } from "./retrieval.service.ts";
 
@@ -11,14 +14,24 @@ interface ChatResponse {
 }
 
 interface ChatData {
+  conversationId: string;
   question: string;
   userId: string;
 }
 
+
 export const askQuestion = async ({
+  conversationId,
   question,
   userId,
 }: ChatData): Promise<ChatResponse> => {
+  await MessageModel.create({
+    chat: conversationId,
+    role: "user",
+    content: question
+  })
+
+
   // Retrieve relevant chunks
   const matches = await retrievedRelevantChunks(question, userId);
 
@@ -46,6 +59,24 @@ ${question}
 `;
 
   const answer = await llm.generate({ prompt });
+
+  await MessageModel.create({
+    chat: conversationId,
+    role: "assistant",
+    content: answer.trim(),
+    sources: matches.map((chunk) => ({
+      documentId: chunk.documentId,
+      chunkIndex: chunk.chunkIndex,
+      score: chunk.score
+    }))
+  })
+
+  await ConversationModel.findByIdAndUpdate(
+    conversationId,
+    {
+      lastMessageAt: new Date(),
+    }
+  );
 
   return {
     answer: answer.trim(),

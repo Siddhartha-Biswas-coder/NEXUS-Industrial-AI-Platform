@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.ts";
 import documentRoutes from "./routes/document.routes.ts";
 import testRoutes from "./routes/test.routes.ts";
 import chatRoutes from "./routes/chat.routes.ts";
+import conversationRoutes from "./routes/conversation.routes.ts"
 
 
 const app = express();
@@ -36,8 +37,9 @@ app.get("/api/health", (_, res) => {
 
 app.use("/api/auth", authRoutes)
 app.use("/api/documents", documentRoutes)
-app.use("/api",testRoutes)
+app.use("/api", testRoutes)
 app.use("/api/chat", chatRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 app.use(errorHandler);
 
