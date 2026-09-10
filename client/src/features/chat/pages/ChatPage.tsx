@@ -2,9 +2,16 @@ import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import { useChat } from "../hooks/useChat";
 import { Bot } from "lucide-react";
+import { useEffect } from "react";
+import useConversations from "../hooks/useConversations";
 
 export default function ChatPage() {
   const chat = useChat();
+  const { loadConversations } = useConversations();
+
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
 
   return (
     <div className="min-h-screen bg-[#090a0f] text-white flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -27,7 +34,8 @@ export default function ChatPage() {
                 </span>
               </div>
               <p className="text-xs md:text-sm text-zinc-400 mt-0.5">
-                Ask questions and retrieve semantic insights from your technical documents.
+                Ask questions and retrieve semantic insights from your technical
+                documents.
               </p>
             </div>
           </div>
@@ -42,4 +50,3 @@ export default function ChatPage() {
     </div>
   );
 }
-

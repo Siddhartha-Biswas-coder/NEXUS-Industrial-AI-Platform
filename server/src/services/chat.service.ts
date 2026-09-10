@@ -11,6 +11,12 @@ interface ChatResponse {
     chunkIndex: number;
     score: number;
   }[];
+  conversation: {
+    _id: string;
+    title: string;
+    lastMessageAt: Date;
+    createdAt: Date;
+  }
 }
 
 interface ChatData {
@@ -25,12 +31,25 @@ export const askQuestion = async ({
   question,
   userId,
 }: ChatData): Promise<ChatResponse> => {
+  const conversation = await ConversationModel.findById(conversationId);
+
+  if (!conversation) {
+    throw new Error("Conversation not found.");
+  }
+
   await MessageModel.create({
     chat: conversationId,
     role: "user",
     content: question
   })
 
+  // Rename only on the first message
+  if (conversation.title === "New Conversation") {
+    conversation.title =
+      question.length > 40
+        ? question.slice(0, 40).trim() + "..."
+        : question.trim();
+  }
 
   // Retrieve relevant chunks
   const matches = await retrievedRelevantChunks(question, userId);
@@ -60,30 +79,30 @@ ${question}
 
   const answer = await llm.generate({ prompt });
 
+  const sources = matches.map((chunk) => ({
+    documentId: chunk.documentId,
+    chunkIndex: chunk.chunkIndex,
+    score: chunk.score
+  }))
+
   await MessageModel.create({
     chat: conversationId,
     role: "assistant",
     content: answer.trim(),
-    sources: matches.map((chunk) => ({
-      documentId: chunk.documentId,
-      chunkIndex: chunk.chunkIndex,
-      score: chunk.score
-    }))
+    sources,
   })
 
-  await ConversationModel.findByIdAndUpdate(
-    conversationId,
-    {
-      lastMessageAt: new Date(),
-    }
-  );
+  conversation.lastMessageAt = new Date();
+  await conversation.save();
 
   return {
     answer: answer.trim(),
-    sources: matches.map((chunk) => ({
-      documentId: chunk.documentId,
-      chunkIndex: chunk.chunkIndex,
-      score: chunk.score,
-    })),
+    sources,
+    conversation: {
+      _id: conversation.id,
+      title: conversation.title,
+      lastMessageAt: conversation.lastMessageAt,
+      createdAt: conversation.createdAt
+    }
   };
 };

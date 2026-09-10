@@ -1,4 +1,4 @@
-import type { Message } from "../state/types";
+import type { Message } from "../types/chats.types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
 import { Sparkles, User, BookOpen } from "lucide-react";

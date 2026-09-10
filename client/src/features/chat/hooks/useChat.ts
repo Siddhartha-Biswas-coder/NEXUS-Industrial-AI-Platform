@@ -1,39 +1,57 @@
 import { useAppDispatch, useAppSelector } from "../../../shared/hooks"
 import { askQuestion } from "../services/chat.service"
-import { addMessage, setLoading } from "../state/chatSlice"
-import type { Message } from "../state/types"
+import { addMessage, setLoading, updateConversation } from "../state/conversationSlice"
+import type { Message } from "../types/conversation.types"
 
 
 export const useChat = () => {
-    const { messages, loading } = useAppSelector((state) => state.chat)
     const dispatch = useAppDispatch();
 
-    const sendMessage = async (question: string) => {
-        const userMessage: Message = {
-            id: crypto.randomUUID(),
-            role: "user",
-            content: question
+    const {
+        messages,
+        loading,
+        activeConversation,
+    } = useAppSelector((state) => state.conversation);
+
+    const sendMessage = async (
+        question: string,
+        conversationId?: string
+    ) => {
+        const id =
+            conversationId ??
+            activeConversation?._id;
+
+        if (!id) {
+            throw new Error("No active conversation.");
         }
 
-        dispatch(addMessage(userMessage));
+        const userMessage: Message = {
+            role: "user",
+            content: question,
+        };
 
+        dispatch(addMessage(userMessage));
         dispatch(setLoading(true));
 
         try {
-            const response = await askQuestion(question);
+            const response = await askQuestion(
+                id,
+                question
+            );
 
             dispatch(
                 addMessage({
-                    id: crypto.randomUUID(),
                     role: "assistant",
                     content: response.answer,
-                    sources: response.sources
+                    sources: response.sources,
                 })
-            )
+            );
+
+            dispatch(updateConversation(response.conversation))
         } finally {
-            dispatch(setLoading(false))
+            dispatch(setLoading(false));
         }
-    }
+    };
 
 
     return {

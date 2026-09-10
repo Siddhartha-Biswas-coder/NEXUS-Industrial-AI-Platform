@@ -1,5 +1,5 @@
 import { FileText, ExternalLink } from "lucide-react";
-import type { Source } from "../state/types";
+import type { Source } from "../types/chats.types";
 
 interface SourceCardProps {
   source: Source;
@@ -18,13 +18,18 @@ export default function SourceCard({ source }: SourceCardProps) {
 
         <div className="text-xs min-w-0">
           <div className="text-zinc-200 font-medium truncate group-hover:text-white transition-colors">
-            Doc <span className="font-mono text-cyan-300">{source.documentId.slice(0, 8)}</span>
+            Doc{" "}
+            <span className="font-mono text-cyan-300">
+              {source.documentId.slice(0, 8)}
+            </span>
           </div>
 
           <div className="text-zinc-400 text-[11px] mt-0.5 flex items-center gap-1.5">
             <span>Chunk {source.chunkIndex}</span>
             <span>•</span>
-            <span className="text-zinc-400">Score {(source.score * 100).toFixed(0)}%</span>
+            <span className="text-zinc-400">
+              Score {(source.score * 100).toFixed(0)}%
+            </span>
           </div>
         </div>
       </div>
@@ -37,4 +42,4 @@ export default function SourceCard({ source }: SourceCardProps) {
       </div>
     </div>
   );
-}
+}
