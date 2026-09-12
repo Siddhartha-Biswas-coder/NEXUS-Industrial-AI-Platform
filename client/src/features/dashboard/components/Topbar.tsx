@@ -17,7 +17,7 @@ export default function Topbar() {
       initial={{ opacity: 0, y: -15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="top-0 z-20 h-20 px-4 sm:px-8 flex items-center justify-between border-b border-white/10 bg-[#090a0f]/80 backdrop-blur-xl relative overflow-hidden select-none"
+      className="h-20 px-4 sm:px-8 flex items-center justify-between rounded-2xl md:rounded-3xl border border-white/10 bg-zinc-950/70 backdrop-blur-xl relative overflow-hidden select-none shrink-0 shadow-xl shadow-black/40"
     >
       {/* Background Ambient Glowing Accents */}
       <div className="absolute top-0 right-1/3 w-96 h-20 bg-cyan-500/10 blur-[100px] pointer-events-none" />

@@ -3,12 +3,15 @@ import asyncHandler from "../middlewares/asyncHandler.ts";
 import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 import ApiResponse from "../utils/ApiResponse.ts";
 import { createConversation, GetConversations, GetMessages } from "../services/conversation.service.ts";
-import { conversationParamsSchema } from "../validators/conversation.validator.ts";
+import { conversationParamsSchema, createConversationSchema } from "../validators/conversation.validator.ts";
 
 export const createConversationController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
+        const { title } = createConversationSchema.parse(req.body)
+
         const conversation = await createConversation({
             userId: req.user!.id,
+            title,
         });
 
         return res.status(201).json(

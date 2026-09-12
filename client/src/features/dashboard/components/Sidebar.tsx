@@ -11,14 +11,15 @@ import {
 import { motion } from "framer-motion";
 import { useAuth } from "../../auth/hooks/useAuth";
 import useConversations from "../../chat/hooks/useConversations";
+import ConversationItem from "../../chat/components/ConversationItem";
+import { useCallback } from "react";
 
 export default function Sidebar() {
   const { logoutUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { conversations, activeConversation, loading, createNewConversation } =
-    useConversations();
+  const { conversations, activeConversation, loading } = useConversations();
 
   const isChatPage = location.pathname.startsWith("/chat");
 
@@ -28,8 +29,15 @@ export default function Sidebar() {
     { name: "AI Chat", path: "/chat", icon: MessageSquare },
   ];
 
+  const handleConversationSelect = useCallback(
+    (id: string) => {
+      navigate(`/chat/${id}`);
+    },
+    [navigate],
+  );
+
   return (
-    <aside className="w-[288px] h-screen sticky top-0 border-r border-white/10 bg-[#090a0f]/90 backdrop-blur-2xl flex flex-col p-4 overflow-hidden select-none z-30 shrink-0">
+    <aside className="w-[288px] h-full rounded-2xl md:rounded-3xl border border-white/10 bg-zinc-950/70 backdrop-blur-2xl flex flex-col p-4 overflow-hidden select-none z-30 shrink-0 shadow-xl shadow-black/40">
       {/* Ambient Glows */}
       <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -121,11 +129,7 @@ export default function Sidebar() {
 
         {/* Conversations */}
         {isChatPage && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex-1 flex flex-col min-h-0 border-t border-white/10 pt-5"
-          >
+          <div className="flex-1 flex flex-col min-h-0 border-t border-white/10 pt-5">
             <div className="flex items-center justify-between px-2 mb-3">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
                 Conversations
@@ -133,8 +137,7 @@ export default function Sidebar() {
 
               <button
                 onClick={async () => {
-                  const conversation = await createNewConversation();
-                  navigate(`/chat/${conversation._id}`);
+                  navigate(`/chat`);
                 }}
                 className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-cyan-300 transition cursor-pointer"
               >
@@ -143,39 +146,26 @@ export default function Sidebar() {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-1 space-y-1">
-              {loading ? (
-                <p className="text-xs text-zinc-500 px-2">Loading...</p>
-              ) : conversations.length === 0 ? (
-                <p className="text-xs text-zinc-500 px-2">
-                  No conversations yet.
-                </p>
+              {conversations.length === 0 ? (
+                loading ? (
+                  <p className="text-xs text-zinc-500 px-2">Loading...</p>
+                ) : (
+                  <p className="text-xs text-zinc-500 px-2">
+                    No conversations yet.
+                  </p>
+                )
               ) : (
                 conversations.map((conversation) => (
-                  <button
+                  <ConversationItem
                     key={conversation._id}
-                    onClick={async () => {
-                      navigate(`/chat/${conversation._id}`);
-                    }}
-                    className={`w-full rounded-xl px-3 py-2 text-left transition ${
-                      activeConversation?._id === conversation._id
-                        ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-300"
-                        : "hover:bg-white/5 text-zinc-300"
-                    }`}
-                  >
-                    <p className="truncate text-sm font-medium">
-                      {conversation.title}
-                    </p>
-
-                    <p className="text-[11px] text-zinc-500">
-                      {new Date(
-                        conversation.lastMessageAt,
-                      ).toLocaleDateString()}
-                    </p>
-                  </button>
+                    conversation={conversation}
+                    active={activeConversation?._id === conversation._id}
+                    onSelect={handleConversationSelect}
+                  />
                 ))
               )}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 

@@ -23,7 +23,6 @@ export default function DocumentsPage() {
       </div>
 
       <UploadZone {...documentsHook} />
-
       <DocumentList {...documentsHook} />
     </div>
   );

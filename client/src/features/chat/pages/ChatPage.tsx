@@ -6,8 +6,11 @@ import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import useChat from "../hooks/useChat";
 import useConversations from "../hooks/useConversations";
+import { useAppDispatch } from "../../../shared/hooks";
+import { setActiveConversation, setMessages } from "../state/conversationSlice";
 
 export default function ChatPage() {
+  const dispatch = useAppDispatch();
   const chat = useChat();
   const { loadConversations, selectConversation } = useConversations();
   const { conversationId } = useParams();
@@ -28,9 +31,10 @@ export default function ChatPage() {
           await selectConversation(conversation);
           return;
         }
+      } else {
+        dispatch(setActiveConversation(null));
+        dispatch(setMessages([]));
       }
-
-      navigate(`/chat/${conversations[0]._id}`);
     };
 
     init();

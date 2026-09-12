@@ -57,11 +57,11 @@ export default function useConversations() {
     [dispatch]
   );
 
-  const createNewConversation = useCallback(async () => {
+  const createNewConversation = useCallback(async (title?: string) => {
     dispatch(setLoading(true));
 
     try {
-      const conversation = await createConversation();
+      const conversation = await createConversation(title);
 
       dispatch(
         setConversations([conversation, ...conversations])

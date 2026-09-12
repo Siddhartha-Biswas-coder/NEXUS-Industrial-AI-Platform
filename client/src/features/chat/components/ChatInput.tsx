@@ -2,17 +2,16 @@ import { useState } from "react";
 import { SendHorizonal, Loader2 } from "lucide-react";
 
 import useConversations from "../hooks/useConversations";
+import {  useNavigate } from "react-router-dom";
 
 interface ChatInputProps {
   sendMessage: (question: string, conversationId?: string) => Promise<void>;
   loading: boolean;
 }
 
-export default function ChatInput({
-  sendMessage,
-  loading,
-}: ChatInputProps) {
+export default function ChatInput({ sendMessage, loading }: ChatInputProps) {
   const [question, setQuestion] = useState("");
+  const navigate = useNavigate();
 
   const { activeConversation, createNewConversation } = useConversations();
 
@@ -27,8 +26,10 @@ export default function ChatInput({
       let conversationId = activeConversation?._id;
 
       if (!conversationId) {
-        const conversation = await createNewConversation();
+        const conversation = await createNewConversation(text);
         conversationId = conversation._id;
+
+        navigate(`/chat/${conversationId}`, { replace: true });
       }
 
       await sendMessage(text, conversationId);
@@ -58,12 +59,16 @@ export default function ChatInput({
         <button
           onClick={handleSend}
           disabled={loading || !question.trim()}
-          className="h-11 w-11 rounded-xl hover:bg-cyan-400 disabled:bg-zinc-700 flex items-center justify-center transition-colors cursor-pointer"
+          className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+            loading || !question.trim()
+              ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+              : "bg-cyan-400 hover:bg-cyan-300 text-zinc-950"
+          }`}
         >
           {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-black" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <SendHorizonal className="h-5 w-5 text-black" />
+            <SendHorizonal className="h-5 w-5" />
           )}
         </button>
       </div>

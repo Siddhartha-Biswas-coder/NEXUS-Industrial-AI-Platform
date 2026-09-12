@@ -3,6 +3,7 @@ import MessageModel from "../models/message.model.ts";
 
 interface CreateConversationData {
     userId: string;
+    title?: string;
 }
 
 interface GetConversationsData {
@@ -16,10 +17,11 @@ interface GetMessagesData {
 
 export const createConversation = async ({
     userId,
+    title,
 }: CreateConversationData) => {
     return ConversationModel.create({
         owner: userId,
-        title: "New Conversation",
+        title: title ?? "New Conversation",
     });
 };
 

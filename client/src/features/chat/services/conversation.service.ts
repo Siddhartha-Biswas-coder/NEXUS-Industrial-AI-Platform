@@ -1,7 +1,7 @@
 import api from "../../../shared/lib/axios";
 
-export const createConversation = async () => {
-    const response = await api.post("/conversations")
+export const createConversation = async (title?: string) => {
+    const response = await api.post("/conversations", { title })
     return response.data.data
 }
 
