@@ -1,22 +1,43 @@
 import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Bot } from "lucide-react";
 
 import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
-import { useChat } from "../hooks/useChat";
+import useChat from "../hooks/useChat";
 import useConversations from "../hooks/useConversations";
 
 export default function ChatPage() {
   const chat = useChat();
-  const { loadConversations } = useConversations();
+  const { loadConversations, selectConversation } = useConversations();
+  const { conversationId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
+    const init = async () => {
+      const conversations = await loadConversations();
+
+      if (conversations.length === 0) return;
+
+      if (conversationId) {
+        const conversation = conversations.find(
+          (c) => c._id === conversationId,
+        );
+
+        if (conversation) {
+          await selectConversation(conversation);
+          return;
+        }
+      }
+
+      navigate(`/chat/${conversations[0]._id}`);
+    };
+
+    init();
+  }, [loadConversations, conversationId, selectConversation, navigate]);
 
   return (
     <div className="h-full max-w-5xl mx-auto flex flex-col">
-
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-3.5">
@@ -48,12 +69,8 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col min-h-0">
         <ChatWindow messages={chat.messages} loading={chat.loading} />
 
-        <ChatInput
-          sendMessage={chat.sendMessage}
-          loading={chat.loading}
-        />
+        <ChatInput sendMessage={chat.sendMessage} loading={chat.loading} />
       </div>
-
     </div>
   );
 }

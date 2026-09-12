@@ -30,8 +30,11 @@ export default function useConversations() {
     dispatch(setLoading(true));
 
     try {
-      const data = await getConversations();
-      dispatch(setConversations(data));
+      const conversations = await getConversations();
+
+      dispatch(setConversations(conversations));
+
+      return conversations;
     } finally {
       dispatch(setLoading(false));
     }
@@ -39,12 +42,14 @@ export default function useConversations() {
 
   const selectConversation = useCallback(
     async (conversation: Conversation) => {
-      dispatch(setActiveConversation(conversation));
+      dispatch(setActiveConversation(conversation))
+
       dispatch(setLoading(true));
 
       try {
-        const data = await getMessages(conversation._id);
-        dispatch(setMessages(data));
+        const messages = await getMessages(conversation._id);
+
+        dispatch(setMessages(messages));
       } finally {
         dispatch(setLoading(false));
       }

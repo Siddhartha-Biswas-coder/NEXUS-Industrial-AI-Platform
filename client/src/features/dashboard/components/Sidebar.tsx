@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FolderOpen,
@@ -9,49 +9,35 @@ import {
   Plus,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
 import { useAuth } from "../../auth/hooks/useAuth";
 import useConversations from "../../chat/hooks/useConversations";
 
 export default function Sidebar() {
   const { logoutUser } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const {
-    conversations,
-    activeConversation,
-    loading,
-    selectConversation,
-    createNewConversation,
-  } = useConversations();
+  const { conversations, activeConversation, loading, createNewConversation } =
+    useConversations();
 
-  const isChatPage = location.pathname === "/chat";
+  const isChatPage = location.pathname.startsWith("/chat");
 
   const navItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Documents",
-      path: "/documents",
-      icon: FolderOpen,
-    },
-    {
-      name: "AI Chat",
-      path: "/chat",
-      icon: MessageSquare,
-    },
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Documents", path: "/documents", icon: FolderOpen },
+    { name: "AI Chat", path: "/chat", icon: MessageSquare },
   ];
 
   return (
-    <aside className="w-[288px] h-screen sticky top-0 border-r border-white/10 bg-[#090a0f]/90 backdrop-blur-2xl flex flex-col justify-between p-4 overflow-hidden select-none z-30 shrink-0">
+    <aside className="w-[288px] h-screen sticky top-0 border-r border-white/10 bg-[#090a0f]/90 backdrop-blur-2xl flex flex-col p-4 overflow-hidden select-none z-30 shrink-0">
+      {/* Ambient Glows */}
       <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 space-y-6">
+      {/* Scrollable Content */}
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 space-y-6">
+        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -70,7 +56,6 @@ export default function Sidebar() {
                 <h1 className="text-base font-extrabold tracking-wider text-white">
                   NEXUS
                 </h1>
-
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   AI
                 </span>
@@ -88,6 +73,7 @@ export default function Sidebar() {
           </div>
         </motion.div>
 
+        {/* Navigation */}
         <nav className="space-y-1.5">
           <div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Main Menu
@@ -121,9 +107,7 @@ export default function Sidebar() {
 
                     <Icon className="relative z-10 w-5 h-5" />
 
-                    <span className="relative z-10">
-                      {item.name}
-                    </span>
+                    <span className="relative z-10">{item.name}</span>
 
                     {isActive && (
                       <Sparkles className="relative z-10 ml-auto w-3.5 h-3.5 text-cyan-400" />
@@ -135,30 +119,32 @@ export default function Sidebar() {
           })}
         </nav>
 
+        {/* Conversations */}
         {isChatPage && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-3"
+            className="flex-1 flex flex-col min-h-0 border-t border-white/10 pt-5"
           >
-            <div className="flex items-center justify-between px-2">
+            <div className="flex items-center justify-between px-2 mb-3">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
                 Conversations
               </span>
 
               <button
-                onClick={createNewConversation}
+                onClick={async () => {
+                  const conversation = await createNewConversation();
+                  navigate(`/chat/${conversation._id}`);
+                }}
                 className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-cyan-300 transition cursor-pointer"
               >
                 <Plus size={16} />
               </button>
             </div>
 
-            <div className="space-y-1 max-h-65 overflow-y-auto pr-1">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-1">
               {loading ? (
-                <p className="text-xs text-zinc-500 px-2">
-                  Loading...
-                </p>
+                <p className="text-xs text-zinc-500 px-2">Loading...</p>
               ) : conversations.length === 0 ? (
                 <p className="text-xs text-zinc-500 px-2">
                   No conversations yet.
@@ -167,7 +153,9 @@ export default function Sidebar() {
                 conversations.map((conversation) => (
                   <button
                     key={conversation._id}
-                    onClick={() => selectConversation(conversation)}
+                    onClick={async () => {
+                      navigate(`/chat/${conversation._id}`);
+                    }}
                     className={`w-full rounded-xl px-3 py-2 text-left transition ${
                       activeConversation?._id === conversation._id
                         ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-300"
@@ -180,7 +168,7 @@ export default function Sidebar() {
 
                     <p className="text-[11px] text-zinc-500">
                       {new Date(
-                        conversation.lastMessageAt
+                        conversation.lastMessageAt,
                       ).toLocaleDateString()}
                     </p>
                   </button>
@@ -191,6 +179,7 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Logout */}
       <div className="relative z-10 pt-4 border-t border-white/10">
         <motion.button
           onClick={logoutUser}

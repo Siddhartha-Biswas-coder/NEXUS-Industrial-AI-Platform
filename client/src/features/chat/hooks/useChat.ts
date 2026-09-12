@@ -4,7 +4,7 @@ import { addMessage, setLoading, updateConversation } from "../state/conversatio
 import type { Message } from "../types/conversation.types"
 
 
-export const useChat = () => {
+export default function useChat() {
     const dispatch = useAppDispatch();
 
     const {
