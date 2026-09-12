@@ -15,3 +15,12 @@ export const getMessages = async (conversationId: string) => {
 
     return response.data.data
 }
+
+export const renameConversation = async (
+    conversationId: string,
+    title: string
+) => {
+    const response = await api.patch(`/conversations/${conversationId}`, { title })
+
+    return response.data.data
+}

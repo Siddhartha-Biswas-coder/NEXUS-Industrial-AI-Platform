@@ -12,14 +12,16 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../auth/hooks/useAuth";
 import useConversations from "../../chat/hooks/useConversations";
 import ConversationItem from "../../chat/components/ConversationItem";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export default function Sidebar() {
   const { logoutUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { conversations, activeConversation, loading } = useConversations();
+  const { conversations, activeConversation, loading, renameConversationById } =
+    useConversations();
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const isChatPage = location.pathname.startsWith("/chat");
 
@@ -50,7 +52,10 @@ export default function Sidebar() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/10 backdrop-blur-md shadow-lg shadow-black/40 flex items-center justify-between group hover:border-cyan-500/30 transition-all duration-300"
+          className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/10 backdrop-blur-md shadow-lg shadow-black/40 flex items-center justify-between group hover:border-cyan-500/30 transition-all duration-300 cursor-pointer"
+          onClick={() => {
+            navigate("/");
+          }}
         >
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 via-blue-600 to-purple-600 p-0.5">
@@ -161,6 +166,12 @@ export default function Sidebar() {
                     conversation={conversation}
                     active={activeConversation?._id === conversation._id}
                     onSelect={handleConversationSelect}
+                    onRename={renameConversationById}
+                    menuOpen={openMenuId === conversation._id}
+                    onMenuToggle={(id) =>
+                      setOpenMenuId((prev) => (prev === id ? null : id))
+                    }
+                    onMenuClose={() => setOpenMenuId(null)}
                   />
                 ))
               )}

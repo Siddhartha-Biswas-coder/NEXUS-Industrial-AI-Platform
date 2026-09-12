@@ -12,6 +12,7 @@ import {
   createConversation,
   getConversations,
   getMessages,
+  renameConversation,
 } from "../services/conversation.service";
 
 import type { Conversation } from "../types/conversation.types";
@@ -26,19 +27,20 @@ export default function useConversations() {
     loading,
   } = useAppSelector((state) => state.conversation);
 
-  const loadConversations = useCallback(async () => {
-    dispatch(setLoading(true));
+  const loadConversations = useCallback(
+    async () => {
+      dispatch(setLoading(true));
 
-    try {
-      const conversations = await getConversations();
+      try {
+        const conversations = await getConversations();
 
-      dispatch(setConversations(conversations));
+        dispatch(setConversations(conversations));
 
-      return conversations;
-    } finally {
-      dispatch(setLoading(false));
-    }
-  }, [dispatch]);
+        return conversations;
+      } finally {
+        dispatch(setLoading(false));
+      }
+    }, [dispatch]);
 
   const selectConversation = useCallback(
     async (conversation: Conversation) => {
@@ -77,6 +79,29 @@ export default function useConversations() {
     }
   }, [dispatch, conversations]);
 
+  const renameConversationById = useCallback(
+    async (conversationId: string, title: string) => {
+      const updated = await renameConversation(conversationId, title);
+
+      dispatch(
+        setConversations(
+          conversations.map((conversation) =>
+            conversation._id === conversationId
+              ? updated
+              : conversation
+          )
+        )
+      )
+
+      if (activeConversation?._id === conversationId) {
+        dispatch(setActiveConversation(updated))
+      }
+
+      return updated
+    },
+    [dispatch, conversations, activeConversation]
+  )
+
   return {
     conversations,
     activeConversation,
@@ -85,5 +110,6 @@ export default function useConversations() {
     loadConversations,
     selectConversation,
     createNewConversation,
+    renameConversationById
   };
 }

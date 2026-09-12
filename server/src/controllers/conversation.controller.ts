@@ -2,8 +2,8 @@ import { Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler.ts";
 import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 import ApiResponse from "../utils/ApiResponse.ts";
-import { createConversation, GetConversations, GetMessages } from "../services/conversation.service.ts";
-import { conversationParamsSchema, createConversationSchema } from "../validators/conversation.validator.ts";
+import { createConversation, GetConversations, GetMessages, updateConversationTitle } from "../services/conversation.service.ts";
+import { conversationParamsSchema, createConversationSchema, updateConversationSchema } from "../validators/conversation.validator.ts";
 
 export const createConversationController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
@@ -42,10 +42,10 @@ export const GetConversationsController = asyncHandler(
 
 export const GetMessagesController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
-        const { id } = conversationParamsSchema.parse(req.params);
+        const { conversationId } = conversationParamsSchema.parse(req.params);
 
         const messages = await GetMessages({
-            conversationId: id,
+            conversationId,
             userId: req.user!.id,
         });
 
@@ -54,6 +54,27 @@ export const GetMessagesController = asyncHandler(
                 200,
                 messages,
                 "Messages fetched successfully"
+            )
+        )
+    }
+)
+
+export const updateConversationTitleController = asyncHandler(
+    async (req: AuthRequest, res: Response) => {
+        const { title } = updateConversationSchema.parse(req.body)
+        const { conversationId } = conversationParamsSchema.parse(req.params)
+
+        const conversation = await updateConversationTitle({
+            conversationId,
+            userId: req.user!.id,
+            title,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                conversation,
+                "Conversation updated successfully"
             )
         )
     }

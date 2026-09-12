@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAppSelector } from "../../../shared/hooks";
 import {
   Sparkles,
   ArrowRight,
@@ -18,6 +19,9 @@ import {
 } from "lucide-react";
 
 export const Hero = () => {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const getStartedPath = isAuthenticated ? "/dashboard" : "/login";
+
   const [activeTab, setActiveTab] = useState<"chat" | "vectors" | "chunks">("chat");
   const [selectedCitation, setSelectedCitation] = useState<number | null>(1);
   const [showDemoModal, setShowDemoModal] = useState(false);
@@ -81,13 +85,14 @@ export const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            
           >
             <Link
-              to="/signup"
+              to={getStartedPath}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-semibold text-white bg-linear-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:-translate-y-0.5 border border-white/10 group"
             >
               <Sparkles className="w-5 h-5 text-cyan-200" />
-              <span>Get Started</span>
+              <span>{isAuthenticated ? "Go to Dashboard" : "Get Started"}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
 
@@ -462,11 +467,11 @@ export const Hero = () => {
                 Nexus chunks engineering PDFs into 512-token segments, computes OpenAI embeddings, stores vectors in Pinecone, and delivers exact answers in under 100ms.
               </p>
               <Link
-                to="/signup"
+                to={getStartedPath}
                 onClick={() => setShowDemoModal(false)}
                 className="mt-2 px-6 py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-purple-600 text-white font-semibold text-xs"
               >
-                Try Nexus Now Free
+                {isAuthenticated ? "Go to Dashboard" : "Try Nexus Now Free"}
               </Link>
             </div>
           </motion.div>

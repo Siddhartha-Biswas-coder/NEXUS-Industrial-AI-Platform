@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cpu, Menu, X, ArrowRight, Sparkles } from "lucide-react";
+import { useAppSelector } from "../../../shared/hooks";
 
 export const Navbar = () => {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -55,20 +57,33 @@ export const Navbar = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">
-          <Link
-            to="/login"
-            className="text-sm font-medium text-zinc-300 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-200"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/signup"
-            className="relative inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/35 border border-white/10 group"
-          >
-            <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
-            <span>Get Started</span>
-            <ArrowRight className="w-4 h-4 text-cyan-200 group-hover:translate-x-1 transition-transform duration-200" />
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to="/dashboard"
+              className="relative inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/35 border border-white/10 group"
+            >
+              <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
+              <span>Go to Dashboard</span>
+              <ArrowRight className="w-4 h-4 text-cyan-200 group-hover:translate-x-1 transition-transform duration-200" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium text-zinc-300 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-200"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/login"
+                className="relative inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/35 border border-white/10 group"
+              >
+                <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
+                <span>Get Started</span>
+                <ArrowRight className="w-4 h-4 text-cyan-200 group-hover:translate-x-1 transition-transform duration-200" />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -105,21 +120,34 @@ export const Navbar = () => {
             </div>
 
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center text-sm font-medium text-zinc-300 hover:text-white py-2.5 rounded-lg bg-zinc-900 border border-white/10"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/signup"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-white py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/20"
-              >
-                <span>Get Started</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-white py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/20"
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center text-sm font-medium text-zinc-300 hover:text-white py-2.5 rounded-lg bg-zinc-900 border border-white/10"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-white py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/20"
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}

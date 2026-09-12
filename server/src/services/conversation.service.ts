@@ -1,3 +1,4 @@
+import { convertEventStreamToIterableReadableDataStream } from "@langchain/core/utils/event_source_parse";
 import ConversationModel from "../models/conversation.model.ts";
 import MessageModel from "../models/message.model.ts";
 
@@ -13,6 +14,12 @@ interface GetConversationsData {
 interface GetMessagesData {
     conversationId: string;
     userId: string;
+}
+
+interface UpdateConversationData {
+    conversationId: string;
+    userId: string;
+    title: string;
 }
 
 export const createConversation = async ({
@@ -51,5 +58,30 @@ export const GetMessages = async ({
         chat: conversationId,
     }).sort({ createdAt: 1 })
         .select("role content sources createdAt")
+}
+
+export const updateConversationTitle = async ({
+    conversationId,
+    userId,
+    title,
+}: UpdateConversationData) => {
+    const conversation = await ConversationModel.findOneAndUpdate(
+        {
+            _id: conversationId,
+            owner: userId
+        },
+        {
+            title,
+        },
+        {
+            new: true
+        }
+    )
+
+    if (!conversation) {
+        throw new Error("Conversation not found")
+    }
+
+    return conversation
 }
 
