@@ -5,7 +5,7 @@ import {
   setConversations,
   setActiveConversation,
   setMessages,
-  setLoading,
+  setLoadingHistory,
 } from "../state/conversationSlice";
 
 import {
@@ -25,12 +25,14 @@ export default function useConversations() {
     conversations,
     activeConversation,
     messages,
-    loading,
+    loadingHistory,
+    generating,
+    streaming,
   } = useAppSelector((state) => state.conversation);
 
   const loadConversations = useCallback(
     async () => {
-      dispatch(setLoading(true));
+      dispatch(setLoadingHistory(true));
 
       try {
         const conversations = await getConversations();
@@ -39,7 +41,7 @@ export default function useConversations() {
 
         return conversations;
       } finally {
-        dispatch(setLoading(false));
+        dispatch(setLoadingHistory(false));
       }
     }, [dispatch]);
 
@@ -47,21 +49,21 @@ export default function useConversations() {
     async (conversation: Conversation) => {
       dispatch(setActiveConversation(conversation))
 
-      dispatch(setLoading(true));
+      dispatch(setLoadingHistory(true));
 
       try {
         const messages = await getMessages(conversation._id);
 
         dispatch(setMessages(messages));
       } finally {
-        dispatch(setLoading(false));
+        dispatch(setLoadingHistory(false));
       }
     },
     [dispatch]
   );
 
   const createNewConversation = useCallback(async (title?: string) => {
-    dispatch(setLoading(true));
+    dispatch(setLoadingHistory(true));
 
     try {
       const conversation = await createConversation(title);
@@ -76,7 +78,7 @@ export default function useConversations() {
 
       return conversation;
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoadingHistory(false));
     }
   }, [dispatch, conversations]);
 
@@ -127,7 +129,10 @@ export default function useConversations() {
     conversations,
     activeConversation,
     messages,
-    loading,
+    loading: loadingHistory,
+    loadingHistory,
+    generating,
+    streaming,
     loadConversations,
     selectConversation,
     createNewConversation,

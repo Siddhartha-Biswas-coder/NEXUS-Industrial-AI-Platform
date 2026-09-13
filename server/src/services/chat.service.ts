@@ -106,3 +106,64 @@ ${question}
     }
   };
 };
+
+export const askQuestionStream = async ({
+  conversationId,
+  question,
+  userId,
+}: ChatData) => {
+  const conversation = await ConversationModel.findById(conversationId);
+
+  if (!conversation) {
+    throw new Error("Conversation not found.");
+  }
+
+  await MessageModel.create({
+    chat: conversationId,
+    role: "user",
+    content: question,
+  });
+
+  if (conversation.title === "New Conversation") {
+    conversation.title =
+      question.length > 40
+        ? question.slice(0, 40).trim() + "..."
+        : question.trim();
+  }
+
+  const matches = await retrievedRelevantChunks(question, userId);
+
+  const context = matches
+    .slice(0, 5)
+    .map((chunk) => chunk.content)
+    .join("\n\n");
+
+  const prompt = `
+You are Nexus, an AI knowledge assistant.
+
+Rules:
+- Answer ONLY using the provided context.
+- If the answer is not present in the context, reply:
+  "I couldn't find that information in your uploaded documents."
+
+Context:
+--------------------
+${context}
+--------------------
+
+Question:
+${question}
+`;
+
+  const sources = matches.map((chunk) => ({
+    documentId: chunk.documentId,
+    chunkIndex: chunk.chunkIndex,
+    score: chunk.score,
+  }));
+
+  return {
+    stream: llm.streamGenerate({ prompt }),
+    conversation,
+    sources,
+  };
+};

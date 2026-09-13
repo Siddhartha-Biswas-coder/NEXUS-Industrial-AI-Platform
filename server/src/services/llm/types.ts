@@ -3,5 +3,9 @@ export interface GenerateOptions {
 }
 
 export interface LLMProvider {
-    generate(options: GenerateOptions): Promise<string>
+    generate(options: GenerateOptions): Promise<string>;
+
+    streamGenerate(
+        options: GenerateOptions
+    ): AsyncGenerator<string, void, unknown>
 }

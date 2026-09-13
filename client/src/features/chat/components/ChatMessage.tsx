@@ -2,13 +2,13 @@ import type { Message, MessageSource } from "../types/conversation.types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
 import { Sparkles, User, BookOpen } from "lucide-react";
-import TypingText from "./TypingText";
 
 interface ChatMessageProps {
   message: Message;
+  streaming?: boolean;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+export default function ChatMessage({ message, streaming }: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
@@ -25,7 +25,11 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             : "bg-zinc-900 border border-white/10 text-cyan-400"
         }`}
       >
-        {isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+        {isUser ? (
+          <User className="w-4 h-4" />
+        ) : (
+          <Sparkles className="w-4 h-4" />
+        )}
       </div>
 
       <div
@@ -36,11 +40,18 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         }`}
       >
         {isUser ? (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap font-normal">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap font-normal wrap-break-word">
             {message.content}
           </p>
         ) : (
-          <TypingText text={message.content} />
+          <div className="text-sm leading-relaxed whitespace-pre-wrap font-normal wrap-break-word">
+            {message.content}
+            {streaming && (
+              <span className="inline-block ml-0.5 text-cyan-400 animate-pulse">
+                ▍
+              </span>
+            )}
+          </div>
         )}
 
         {!isUser && message.sources && message.sources.length > 0 && (

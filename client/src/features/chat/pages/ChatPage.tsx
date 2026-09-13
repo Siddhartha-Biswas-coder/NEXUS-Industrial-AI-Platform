@@ -45,8 +45,16 @@ export default function ChatPage() {
       <ChatHeader />
 
       <div className="flex-1 flex flex-col min-h-0">
-        <ChatWindow messages={chat.messages} loading={chat.loading} />
-        <ChatInput sendMessage={chat.sendMessage} loading={chat.loading} />
+        <ChatWindow
+          messages={chat.messages}
+          loadingHistory={chat.loadingHistory}
+          generating={chat.generating}
+          streaming={chat.streaming}
+        />
+        <ChatInput
+          sendMessage={chat.sendMessage}
+          loading={chat.generating || chat.loadingHistory}
+        />
       </div>
     </div>
   );

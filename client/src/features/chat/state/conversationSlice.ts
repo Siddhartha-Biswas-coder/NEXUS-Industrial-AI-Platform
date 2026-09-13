@@ -7,14 +7,20 @@ interface ConversationState {
     activeConversation: Conversation | null;
     messages: Message[];
     loading: boolean;
+    loadingHistory: boolean;
+    generating: boolean;
+    streaming: boolean;
 }
 
 const initialState: ConversationState = {
     conversations: [],
     activeConversation: null,
     messages: [],
-    loading: false
-}
+    loading: false,
+    loadingHistory: false,
+    generating: false,
+    streaming: false,
+};
 
 const conversationSlice = createSlice({
     name: "conversation",
@@ -56,6 +62,20 @@ const conversationSlice = createSlice({
             state.loading = action.payload;
         },
 
+        setLoadingHistory(
+            state,
+            action: PayloadAction<boolean>
+        ) {
+            state.loadingHistory = action.payload;
+        },
+
+        setGenerating(
+            state,
+            action: PayloadAction<boolean>
+        ) {
+            state.generating = action.payload;
+        },
+
         updateConversation(state, action: PayloadAction<Conversation>) {
             state.conversations = state.conversations.map((conversation) =>
                 conversation._id == action.payload._id
@@ -66,6 +86,26 @@ const conversationSlice = createSlice({
             if (state.activeConversation?._id == action.payload._id) {
                 state.activeConversation = action.payload
             }
+        },
+
+        appendToLastAssistantMessage(state, action) {
+            const last = state.messages[state.messages.length - 1];
+
+            if (last && last.role === "assistant") {
+                last.content += action.payload
+            }
+        },
+
+        updateLastAssistantMessage(state, action) {
+            const last = state.messages[state.messages.length - 1];
+
+            if (last?.role === "assistant") {
+                last.sources = action.payload
+            }
+        },
+
+        setStreaming(state, action: PayloadAction<boolean>) {
+            state.streaming = action.payload
         }
     },
 });
@@ -76,7 +116,12 @@ export const {
     setMessages,
     addMessage,
     setLoading,
-    updateConversation
+    setLoadingHistory,
+    setGenerating,
+    updateConversation,
+    appendToLastAssistantMessage,
+    updateLastAssistantMessage,
+    setStreaming
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

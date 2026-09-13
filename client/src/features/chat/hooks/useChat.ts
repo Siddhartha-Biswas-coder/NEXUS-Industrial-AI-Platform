@@ -1,6 +1,12 @@
 import { useAppDispatch, useAppSelector } from "../../../shared/hooks"
-import { askQuestion } from "../services/chat.service"
-import { addMessage, setLoading, updateConversation } from "../state/conversationSlice"
+import { askQuestionStream } from "../services/chat.service"
+import {
+    addMessage, updateConversation,
+    appendToLastAssistantMessage,
+    updateLastAssistantMessage,
+    setGenerating,
+    setStreaming
+} from "../state/conversationSlice"
 import type { Message } from "../types/conversation.types"
 
 
@@ -9,7 +15,9 @@ export default function useChat() {
 
     const {
         messages,
-        loading,
+        loadingHistory,
+        generating,
+        streaming,
         activeConversation,
     } = useAppSelector((state) => state.conversation);
 
@@ -31,32 +39,63 @@ export default function useChat() {
         };
 
         dispatch(addMessage(userMessage));
-        dispatch(setLoading(true));
+
+        dispatch(setGenerating(true));
+        dispatch(setStreaming(true));
+
+        let hasStartedStreaming = false;
 
         try {
-            const response = await askQuestion(
+            await askQuestionStream(
                 id,
-                question
+                question,
+                (event) => {
+                    switch (event.type) {
+                        case "token":
+                            if (!hasStartedStreaming) {
+                                hasStartedStreaming = true;
+                                dispatch(
+                                    addMessage({
+                                        role: "assistant",
+                                        content: event.content,
+                                        sources: [],
+                                    })
+                                );
+                            } else {
+                                dispatch(appendToLastAssistantMessage(event.content));
+                            }
+                            break;
+                        case "sources":
+                            dispatch(updateLastAssistantMessage(event.sources));
+                            break;
+                        case "conversation":
+                            dispatch(updateConversation(event.conversation));
+                            break;
+                        case "done":
+                            dispatch(setStreaming(false));
+                            dispatch(setGenerating(false));
+                            break;
+                        case "error":
+                            dispatch(setStreaming(false));
+                            dispatch(setGenerating(false));
+                            console.error(event.message);
+                            break
+                    }
+                }
             );
-
-            dispatch(
-                addMessage({
-                    role: "assistant",
-                    content: response.answer,
-                    sources: response.sources,
-                })
-            );
-
-            dispatch(updateConversation(response.conversation))
-        } finally {
-            dispatch(setLoading(false));
+        } catch (error) {
+            console.error(error)
+            dispatch(setStreaming(false));
+            dispatch(setGenerating(false));
         }
     };
 
 
     return {
         messages,
-        loading,
+        loadingHistory,
+        generating,
+        streaming,
         sendMessage
     }
 }

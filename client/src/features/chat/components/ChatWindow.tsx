@@ -5,15 +5,22 @@ import type { Message } from "../types/conversation.types";
 
 interface ChatWindowProps {
   messages: Message[];
-  loading: boolean;
+  loadingHistory: boolean;
+  generating: boolean;
+  streaming: boolean;
 }
 
-export default function ChatWindow({ messages, loading }: ChatWindowProps) {
+export default function ChatWindow({
+  messages,
+  loadingHistory,
+  generating,
+  streaming,
+}: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, streaming, generating]);
 
   return (
     <div className="relative flex-1 rounded-3xl border border-zinc-800/80 bg-zinc-950/70 backdrop-blur-xl p-6 md:p-8 overflow-y-auto mb-4 min-h-105 shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex flex-col justify-between">
@@ -24,7 +31,9 @@ export default function ChatWindow({ messages, loading }: ChatWindowProps) {
       ) : (
         <MessageList
           messages={messages}
-          loading={loading}
+          loadingHistory={loadingHistory}
+          generating={generating}
+          streaming={streaming}
           bottomRef={bottomRef}
         />
       )}
