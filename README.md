@@ -16,13 +16,16 @@
 
 **Nexus** bridges the gap between massive unstructured engineering documentation and actionable insights. Instead of manually navigating through hundreds of technical PDFs, maintenance manuals, standard operating procedures (SOPs), or research papers, Nexus enables engineers and operators to query their documentation using natural language.
 
-Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, stores vectors in **Pinecone** for sub-100ms similarity search, and presents zero-hallucination contextual responses with exact source citations.
+Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, stores vectors in **Pinecone** for sub-100ms similarity search, and presents zero-hallucination contextual responses with exact source citations and ChatGPT-style multi-conversation management.
 
 ---
 
 ## ✨ Key Features
 
-### 💬 RAG AI Assistant & Vector Search
+### 💬 RAG AI Assistant & Multi-Conversation Management
+* **ChatGPT-Style Multi-Chat History**: Create, switch, rename, and delete conversations with persistent MongoDB storage.
+* **Smart Auto-Titling**: Automatically generates clean conversation titles from the user's first query or enables quick inline renaming.
+* **URL-Based Conversation Routing**: Deep-link support for `/chat` (new draft chat) and `/chat/:conversationId` for active chat sessions.
 * **LangChain Semantic Chunking**: Intelligently splits long-form technical PDFs using `RecursiveCharacterTextSplitter`.
 * **FastAPI Local Embedding Microservice**: Generates 384-dimensional dense vectors using HuggingFace's `sentence-transformers/all-MiniLM-L6-v2`.
 * **Pinecone Vector Database**: High-speed cosine similarity indexing for instant vector lookup.
@@ -32,7 +35,7 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
 ### 📄 Document Intelligence & Pipeline
 * **PDF Upload & Parsing**: Asynchronous PDF file extraction via `pdf-parse` and `multer`.
 * **Live Pipeline Tracking**: Real-time status lifecycle (`uploaded` ➔ `processing` ➔ `indexed` or `failed`) with automatic background polling.
-* **Dual Storage Architecture**: Document metadata & text chunk payloads in MongoDB Atlas paired with vector embeddings in Pinecone.
+* **Dual Storage Architecture**: Document metadata, text chunks, conversations, & message histories in MongoDB Atlas paired with vector embeddings in Pinecone.
 * **Document Vault**: Manage uploaded files, file sizes, vector namespaces, and processing statuses.
 
 ### 🔐 Security & Authentication
@@ -42,8 +45,9 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
 
 ### 🎨 Linear & Cursor Inspired SaaS UI
 * **Glassmorphism Aesthetic**: Dark theme (`bg-[#090a0f]`) with subtle backdrop blur, glowing cyan halos, and dark zinc cards.
+* **Portaled Centered Modals**: Portaled React `createPortal` modal overlays (e.g. Delete Conversation modal) centered on screen cleanly above all CSS backdrop filters.
 * **Interactive Upload Zone**: Large glowing cyan drop zone, hardware-accelerated animated SVG dashed drag borders, floating Framer Motion upload icon, hover glow button, spring progress bar, and glowing emerald checkmark success state.
-* **Responsive Layouts**: Modern, mobile-responsive layout across all desktop and mobile viewports.
+* **Responsive Sidebar Layout**: Floating persistent sidebar with conversation listing, inline menus, and active indicators.
 
 ---
 
@@ -67,7 +71,7 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
 ┌─────────────────────────────┐                                     ┌────────────────────┐
 │ FastAPI Embedding Service   │                                     │   MongoDB Atlas    │
 │ (all-MiniLM-L6-v2 Vectors)  │                                     │ (Users, Docs,      │
-└──────────┬──────────────────┘                                     │  Chunks Data)      │
+└──────────┬──────────────────┘                                     │  Chunks, Chats)    │
            │ 384-dim Vectors                                        └────────────────────┘
            ▼
 ┌─────────────────────────────┐
@@ -99,7 +103,8 @@ nexus/
 │   │   ├── app/                # App router, root layout, and route guards
 │   │   ├── features/           # Feature modules (auth, chat, dashboard, documents, landing)
 │   │   │   ├── auth/           # Login & Signup flows with Redux state
-│   │   │   ├── chat/           # RAG Chat interface, ChatWindow, ChatInput, SourceCard
+│   │   │   ├── chat/           # RAG Chat interface, ChatWindow, ChatInput, ConversationItem, useConversations
+│   │   │   ├── dashboard/      # AppLayout, Sidebar, Topbar, QuickActions
 │   │   │   └── documents/      # UploadZone, DocumentList, DocumentCard, useDocuments
 │   │   ├── shared/             # Custom hooks, Redux store, and reusable utilities
 │   │   └── styles/             # Global CSS and Tailwind design tokens
@@ -108,10 +113,10 @@ nexus/
 ├── server/                     # Express 5 Backend API
 │   ├── src/
 │   │   ├── config/             # Environment & Pinecone / DB configs
-│   │   ├── controllers/        # Express controllers (auth, documents, chat)
+│   │   ├── controllers/        # Express controllers (auth, documents, chat, conversation)
 │   │   ├── middlewares/        # Authentication, validation, and error middlewares
-│   │   ├── models/             # Mongoose schemas (User, Document, Chunk)
-│   │   ├── routes/             # Router endpoints (auth, documents, chat)
+│   │   ├── models/             # Mongoose schemas (User, Document, Chunk, Conversation, Message)
+│   │   ├── routes/             # Router endpoints (auth, documents, chat, conversation)
 │   │   ├── services/           # Business logic (RAG ingestion, vector search, Q&A)
 │   │   └── validators/         # Zod schemas
 │   └── package.json
@@ -140,10 +145,19 @@ nexus/
 | `GET` | `/api/documents` | List uploaded user documents & statuses (`uploaded`, `processing`, `indexed`, `failed`) | ✅ |
 | `GET` | `/api/documents/:id/chunks` | Retrieve chunk details & debugging information | ✅ |
 
+### Conversation Management (`/api/conversations`)
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `POST` | `/api/conversations` | Initialize a new conversation session | ✅ |
+| `GET` | `/api/conversations` | List user's conversations sorted by latest activity | ✅ |
+| `GET` | `/api/conversations/:conversationId/messages` | Fetch complete message history for a conversation | ✅ |
+| `PATCH` | `/api/conversations/:conversationId` | Update conversation title | ✅ |
+| `DELETE` | `/api/conversations/:conversationId` | Delete conversation and remove associated messages | ✅ |
+
 ### AI Assistant Chat (`/api/chat`)
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :---: |
-| `POST` | `/api/chat` | Send question, retrieve relevant document vector chunks, & generate grounded answer with citations | ✅ |
+| `POST` | `/api/chat` | Send question with conversation context, retrieve vector chunks, & persist message response | ✅ |
 
 ---
 
