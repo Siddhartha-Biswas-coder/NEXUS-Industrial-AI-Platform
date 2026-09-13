@@ -42,9 +42,9 @@ export default function Topbar() {
 
         <div className="flex items-center gap-2 text-xs text-zinc-400 font-medium">
           <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-          <span>Industrial AI Workspace</span>
+          <span>Document Intelligence Workspace</span>
           <span className="text-zinc-600">•</span>
-          <span className="text-zinc-400">Neural Engine Online</span>
+          <span className="text-zinc-400">RAG Engine Online</span>
         </div>
       </div>
 

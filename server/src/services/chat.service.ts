@@ -11,6 +11,8 @@ export type ResponseType = "rag" | "general" | "hybrid";
 interface Source {
   documentId: string;
   chunkIndex: number;
+  documentTitle?: string;
+  pageNumber?: number;
   score: number;
 }
 
@@ -99,7 +101,9 @@ export const askQuestion = async ({
   const sources = useRAG
     ? matches.map((chunk) => ({
       documentId: chunk.documentId,
+      documentTitle: chunk.documentTitle,
       chunkIndex: chunk.chunkIndex,
+      pageNumber: chunk.pageNumber,
       score: chunk.score
     }))
     : []
@@ -181,8 +185,10 @@ export const askQuestionStream = async ({
   const sources = useRAG
     ? matches.map((chunk) => ({
       documentId: chunk.documentId,
+      documentTitle: chunk.documentTitle,
       chunkIndex: chunk.chunkIndex,
       score: chunk.score,
+      pageNumber: chunk.pageNumber,
     }))
     : [];
 

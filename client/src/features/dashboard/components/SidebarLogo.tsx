@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Cpu } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const SidebarLogo: React.FC = () => {
@@ -15,9 +15,9 @@ export const SidebarLogo: React.FC = () => {
       onClick={() => navigate("/")}
     >
       <div className="flex items-center gap-3">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 via-blue-600 to-purple-600 p-0.5">
+        <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 via-blue-600 to-purple-600 p-0.5 shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
           <div className="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center">
-            <Cpu className="w-5 h-5 text-cyan-400" />
+            <BrainCircuit className="w-5 h-5 text-cyan-400 group-hover:rotate-6 transition-transform duration-300" />
           </div>
         </div>
 
@@ -31,7 +31,7 @@ export const SidebarLogo: React.FC = () => {
             </span>
           </div>
           <p className="text-[11px] text-zinc-400 font-medium">
-            Industrial AI Platform
+            Document Intelligence
           </p>
         </div>
       </div>

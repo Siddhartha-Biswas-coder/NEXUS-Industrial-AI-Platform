@@ -1,9 +1,3 @@
-export interface MessageSource {
-    documentId: string;
-    chunkIndex: number;
-    score: number;
-}
-
 export type ResponseType = "rag" | "general" | "hybrid"
 
 export interface Message {
@@ -24,12 +18,15 @@ export interface Conversation {
 
 export interface MessageSource {
     documentId: string;
+    documentTitle: string;
     chunkIndex: number;
+    pageNumber: number;
     score: number;
 }
 
 export interface ChatResponse {
     answer: string;
+    responseType: ResponseType;
     sources: MessageSource[];
     conversation: Conversation;
 }

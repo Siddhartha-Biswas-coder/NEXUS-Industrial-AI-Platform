@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Menu, X, ArrowRight, Sparkles } from "lucide-react";
+import { BrainCircuit, Menu, X, ArrowRight, Sparkles } from "lucide-react";
 import { useAppSelector } from "../../../shared/hooks";
 
 export const Navbar = () => {
@@ -28,7 +28,7 @@ export const Navbar = () => {
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-tr from-cyan-500/20 via-purple-500/20 to-blue-500/20 border border-white/10 group-hover:border-cyan-500/50 transition-all duration-300 shadow-lg shadow-cyan-500/10">
-            <Cpu className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
+            <BrainCircuit className="w-5 h-5 text-cyan-400 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
             <div className="absolute inset-0 rounded-xl bg-cyan-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
           <div className="flex flex-col">
@@ -37,11 +37,11 @@ export const Navbar = () => {
                 NEXUS
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                AI 2.0
+                AI
               </span>
             </div>
             <span className="text-[10px] text-zinc-400 tracking-wider uppercase hidden sm:block">
-              Knowledge Engine
+              RAG Knowledge Engine
             </span>
           </div>
         </Link>

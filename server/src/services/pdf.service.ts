@@ -1,23 +1,33 @@
 import fs from "fs/promises";
-import { PDFParse } from "pdf-parse";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export const extractPdfText = async (filePath: string) => {
-    const buffer = await fs.readFile(filePath);
+  const buffer = await fs.readFile(filePath);
 
-    const parser = new PDFParse({ data: buffer });
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+  });
 
-    try {
-        const textResult = await parser.getText();
-        const infoResult = await parser.getInfo();
+  const pdf = await loadingTask.promise;
 
-        await parser.destroy();
+  const pageTexts: string[] = [];
 
-        return {
-            text: textResult.text,
-            pages: textResult.total,
-            metadata: infoResult.info,
-        };
-    } finally {
-        await parser.destroy()
-    }
-}
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+
+    const text = textContent.items
+      .map((item: any) => ("str" in item ? item.str : ""))
+      .join(" ")
+      .trim();
+
+    pageTexts.push(text);
+  }
+
+  return {
+    text: pageTexts.join("\n\n"),
+    pages: pdf.numPages,
+    pageTexts,
+    metadata: {},
+  };
+};

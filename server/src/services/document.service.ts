@@ -36,12 +36,12 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
         await document.save();
 
         // Step 4: Split text into chunks
-        const chunks = await splitTextIntoChunks(parsed.text);
+        const chunks = await splitTextIntoChunks(parsed.pageTexts);
 
         // Step 5: Save chunks to MongoDB
         await saveChunks(document.id, userId, chunks);
 
-        await indexChunks(document.id, userId, chunks)
+        await indexChunks(document.id, document.title, userId, chunks)
 
         // Step 6: Mark document as indexed
         document.status = "indexed";

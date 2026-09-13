@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Eye,
   EyeOff,
-  Cpu,
+  BrainCircuit,
 } from "lucide-react";
 
 const LoginPage = () => {
@@ -64,9 +64,9 @@ const LoginPage = () => {
             className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-900/80 border border-white/10 text-xs font-semibold text-cyan-300 backdrop-blur-md shadow-lg shadow-cyan-500/5 hover:border-cyan-500/30 hover:scale-105 transition-all duration-300 group"
           >
             <div className="w-6 h-6 rounded-full bg-linear-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white shadow-sm">
-              <Cpu className="w-3.5 h-3.5" />
+              <BrainCircuit className="w-3.5 h-3.5" />
             </div>
-            <span className="tracking-wide">NEXUS AI PLATFORM</span>
+            <span className="tracking-wide uppercase font-mono">NEXUS AI — Document Intelligence</span>
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>

@@ -21,64 +21,82 @@ export const streamChatController = asyncHandler(
         //Stream started
         res.write(`data: ${JSON.stringify({ type: "start", conversationId })}\n\n`);
 
-        const { stream, conversation, sources, responseType } = await askQuestionStream({
-            conversationId,
-            question,
-            userId: req.user!.id
-        })
+        try {
+            const { stream, conversation, sources, responseType } = await askQuestionStream({
+                conversationId,
+                question,
+                userId: req.user!.id
+            })
 
-        let fullResponse = "";
+            console.log("Streaming started");
 
-        for await (const token of stream) {
-            fullResponse += token;
+            let fullResponse = "";
+
+            for await (const token of stream) {
+                fullResponse += token;
+
+                res.write(
+                    `data: ${JSON.stringify({
+                        type: "token",
+                        content: token,
+                    })}\n\n`
+                )
+            }
+
+            console.log("Stream finished");
+            console.log("Saving assistant message");
+
+            await MessageModel.create({
+                chat: conversationId,
+                role: "assistant",
+                content: fullResponse.trim(),
+                sources,
+                responseType
+            })
+
+            console.log("Assistant message saved");
+
+            conversation.lastMessageAt = new Date()
+            await ConversationModel.findByIdAndUpdate(conversationId, {
+                lastMessageAt: conversation.lastMessageAt,
+            })
+
+            // Send updated conversation metadata
+            res.write(
+                `data: ${JSON.stringify({
+                    type: "conversation",
+                    conversation,
+                })}\n\n`
+            );
+
+            // Send citations
+            res.write(
+                `data: ${JSON.stringify({
+                    type: "sources",
+                    sources,
+                })}\n\n`
+            );
 
             res.write(
                 `data: ${JSON.stringify({
-                    type: "token",
-                    content: token,
+                    type: "responseType",
+                    responseType,
                 })}\n\n`
-            )
+            );
+
+            //Stream finished
+            res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+
+            res.end()
+        } catch (error: any) {
+            console.error("Error in streamChatController:", error);
+            res.write(
+                `data: ${JSON.stringify({
+                    type: "error",
+                    message: error?.message || "Internal server error while streaming response",
+                })}\n\n`
+            );
+            res.end();
         }
-
-        await MessageModel.create({
-            chat: conversationId,
-            role: "assistant",
-            content: fullResponse.trim(),
-            sources,
-            responseType
-        })
-
-        conversation.lastMessageAt = new Date()
-        await ConversationModel.findByIdAndUpdate(conversationId, {
-            lastMessageAt: conversation.lastMessageAt,
-        })
-
-        // Send updated conversation metadata
-        res.write(
-            `data: ${JSON.stringify({
-                type: "conversation",
-                conversation,
-            })}\n\n`
-        );
-
-        // Send citations
-        res.write(
-            `data: ${JSON.stringify({
-                type: "sources",
-                sources,
-            })}\n\n`
-        );
-
-        res.write(
-            `data: ${JSON.stringify({
-                type: "responseType",
-                responseType,
-            })}\n\n`
-        );
-
-        //Stream finished
-        res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`)
-
-        res.end()
     }
 )

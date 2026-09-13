@@ -5,10 +5,12 @@ import { generateEmbeddings } from "./embedding.service.ts";
 interface ChunkData {
     chunkIndex: number;
     content: string;
+    pageNumber: number;
 }
 
 export const indexChunks = async (
     documentId: string,
+    documentTitle: string,
     ownerId: string,
     chunks: ChunkData[]
 ) => {
@@ -21,9 +23,11 @@ export const indexChunks = async (
         values: embeddings[index],
         metadata: {
             documentId,
+            documentTitle,
             ownerId,
             chunkIndex: chunk.chunkIndex,
             content: chunk.content,
+            pageNumber: chunk.pageNumber,
         }
     }))
 

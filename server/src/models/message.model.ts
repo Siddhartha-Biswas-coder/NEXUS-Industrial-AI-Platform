@@ -20,13 +20,13 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
 
-    sources: [
-      {
-        documentId: String,
-        chunkIndex: Number,
-        score: Number,
-      },
-    ],
+    sources: [{
+      documentId: { type: String },
+      documentTitle: { type: String }, 
+      chunkIndex: { type: Number },
+      pageNumber: { type: Number },
+      score: { type: Number },
+    }],
 
     responseType: {
       type: String,

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Cpu, ArrowUp } from "lucide-react";
+import { BrainCircuit, ArrowUp } from "lucide-react";
 
 export const Footer = () => {
   const scrollToTop = () => {
@@ -14,11 +14,16 @@ export const Footer = () => {
           <div className="md:col-span-5 space-y-4">
             <Link to="/" className="flex items-center gap-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-linear-to-tr from-cyan-500/20 via-purple-500/20 to-blue-500/20 border border-white/10">
-                <Cpu className="w-5 h-5 text-cyan-400" />
+                <BrainCircuit className="w-5 h-5 text-cyan-400" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white font-mono">
-                NEXUS
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-bold tracking-tight text-white font-mono">
+                  NEXUS
+                </span>
+                <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  AI
+                </span>
+              </div>
             </Link>
 
             <p className="text-zinc-400 text-xs sm:text-sm max-w-sm leading-relaxed">
