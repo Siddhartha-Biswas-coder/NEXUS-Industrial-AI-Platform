@@ -38,6 +38,8 @@ const envSchema = z.object({
     OPENAI_API_KEY: z.string().optional(),
 
     LLM_MODEL: z.string().default("llama3.2:3b"),
+
+    RAG_THRESHOLD: z.coerce.number().default(0.45),
 })
 
 const envData = {
@@ -69,6 +71,8 @@ const envData = {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 
     LLM_MODEL: process.env.LLM_MODEL,
+
+    RAG_THRESHOLD: process.env.RAG_THRESHOLD,
 }
 
 const parseEnv = envSchema.safeParse(envData);

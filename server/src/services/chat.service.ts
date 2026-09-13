@@ -1,7 +1,9 @@
 
+import config from "../config/config.ts";
 import ConversationModel from "../models/conversation.model.ts";
 import MessageModel from "../models/message.model.ts";
 import { llm } from "./llm/index.ts";
+import { buildGeneralPrompt, buildRAGPrompt } from "./prompt.service.ts";
 import { retrievedRelevantChunks } from "./retrieval.service.ts";
 
 interface ChatResponse {
@@ -54,36 +56,52 @@ export const askQuestion = async ({
   // Retrieve relevant chunks
   const matches = await retrievedRelevantChunks(question, userId);
 
-  const context = matches
-    .slice(0, 5)
-    .map((chunk) => chunk.content)
-    .join("\n\n");
+  const bestScore = matches[0]?.score ?? 0;
+  const useRAG = bestScore >= config.RAG_THRESHOLD
 
-  const prompt = `
-You are Nexus, an AI knowledge assistant.
+  const context = useRAG
+    ? matches
+      .slice(0, 5)
+      .map((chunk) => chunk.content)
+      .join("\n\n")
+    : "";
 
-Rules:
-- Answer ONLY using the provided context.
-- If the answer is not present in the context, reply:
-  "I couldn't find that information in your uploaded documents."
-- Keep answers clear and concise.
+  const prompt = useRAG
+    ? `
+      You are Nexus, an AI knowledge assistant.
 
-Context:
---------------------
-${context}
---------------------
+      Rules:
+      - Prioritize the provided document context.
+      - If the context fully answers the question, answer from it.
+      - If the context is incomplete, clearly separate document-based information from general knowledge.
 
-Question:
-${question}
-`;
+      Context:
+      --------------------
+      ${context}
+      --------------------
+
+      Question:
+      ${question}
+      `
+    :
+    `
+      You are Nexus, a helpful AI assistant.
+
+      Answer the user's question using your general knowledge.
+
+      Question:
+      ${question}
+    `;
 
   const answer = await llm.generate({ prompt });
 
-  const sources = matches.map((chunk) => ({
-    documentId: chunk.documentId,
-    chunkIndex: chunk.chunkIndex,
-    score: chunk.score
-  }))
+  const sources = useRAG
+    ? matches.map((chunk) => ({
+      documentId: chunk.documentId,
+      chunkIndex: chunk.chunkIndex,
+      score: chunk.score
+    }))
+    : []
 
   await MessageModel.create({
     chat: conversationId,
@@ -133,33 +151,33 @@ export const askQuestionStream = async ({
 
   const matches = await retrievedRelevantChunks(question, userId);
 
-  const context = matches
-    .slice(0, 5)
-    .map((chunk) => chunk.content)
-    .join("\n\n");
+  const bestScore = matches[0]?.score ?? 0;
+  const useRAG = bestScore >= config.RAG_THRESHOLD;
 
-  const prompt = `
-You are Nexus, an AI knowledge assistant.
+  const context = useRAG
+    ? matches
+      .slice(0, 5)
+      .map((chunk) => chunk.content)
+      .join("\n\n")
+    : "";
 
-Rules:
-- Answer ONLY using the provided context.
-- If the answer is not present in the context, reply:
-  "I couldn't find that information in your uploaded documents."
+  const prompt = useRAG
+    ? buildRAGPrompt({
+      question,
+      context
+    })
+    :
+    buildGeneralPrompt({
+      question
+    })
 
-Context:
---------------------
-${context}
---------------------
-
-Question:
-${question}
-`;
-
-  const sources = matches.map((chunk) => ({
-    documentId: chunk.documentId,
-    chunkIndex: chunk.chunkIndex,
-    score: chunk.score,
-  }));
+  const sources = useRAG
+    ? matches.map((chunk) => ({
+      documentId: chunk.documentId,
+      chunkIndex: chunk.chunkIndex,
+      score: chunk.score,
+    }))
+    : [];
 
   return {
     stream: llm.streamGenerate({ prompt }),
