@@ -4,12 +4,15 @@ export interface MessageSource {
     score: number;
 }
 
+export type ResponseType = "rag" | "general" | "hybrid"
+
 export interface Message {
     _id?: string;
     role: "user" | "assistant";
     content: string;
     createdAt?: string;
-    sources?: MessageSource[]
+    sources?: MessageSource[],
+    responseType?: ResponseType
 }
 
 export interface Conversation {

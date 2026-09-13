@@ -61,7 +61,7 @@ export const getMessages = async ({
     return MessageModel.find({
         chat: conversationId,
     }).sort({ createdAt: 1 })
-        .select("role content sources createdAt")
+        .select("role content sources responseType createdAt")
 }
 
 export const updateConversationTitle = async ({

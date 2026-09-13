@@ -5,7 +5,8 @@ import {
     appendToLastAssistantMessage,
     updateLastAssistantMessage,
     setGenerating,
-    setStreaming
+    setStreaming,
+    updateLastAssistantResponseType
 } from "../state/conversationSlice"
 import type { Message } from "../types/conversation.types"
 
@@ -75,6 +76,9 @@ export default function useChat() {
                             dispatch(setStreaming(false));
                             dispatch(setGenerating(false));
                             break;
+                        case "responseType":
+                            dispatch(updateLastAssistantResponseType(event.responseType));
+                            break
                         case "error":
                             dispatch(setStreaming(false));
                             dispatch(setGenerating(false));

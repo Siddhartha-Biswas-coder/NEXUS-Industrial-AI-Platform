@@ -109,6 +109,7 @@ export const askQuestion = async ({
     role: "assistant",
     content: answer.trim(),
     sources,
+    responseType
   })
 
   conversation.lastMessageAt = new Date();

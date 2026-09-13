@@ -1,3 +1,4 @@
+import StatusBadge from "@/shared/components/ui/StatusBadge";
 import type { Message, MessageSource } from "../types/conversation.types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
@@ -44,14 +45,20 @@ export default function ChatMessage({ message, streaming }: ChatMessageProps) {
             {message.content}
           </p>
         ) : (
-          <div className="text-sm leading-relaxed whitespace-pre-wrap font-normal wrap-break-word">
-            {message.content}
-            {streaming && (
-              <span className="inline-block ml-0.5 text-cyan-400 animate-pulse">
-                ▍
-              </span>
+          <>
+            {message.responseType && (
+              <StatusBadge type={message.responseType} />
             )}
-          </div>
+
+            <div className="text-sm leading-relaxed whitespace-pre-wrap font-normal wrap-break-word">
+              {message.content}
+              {streaming && (
+                <span className="inline-block ml-0.5 text-cyan-400 animate-pulse">
+                  ▍
+                </span>
+              )}
+            </div>
+          </>
         )}
 
         {!isUser && message.sources && message.sources.length > 0 && (

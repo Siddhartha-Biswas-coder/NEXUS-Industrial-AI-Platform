@@ -44,7 +44,8 @@ export const streamChatController = asyncHandler(
             chat: conversationId,
             role: "assistant",
             content: fullResponse.trim(),
-            sources
+            sources,
+            responseType
         })
 
         conversation.lastMessageAt = new Date()

@@ -104,6 +104,14 @@ const conversationSlice = createSlice({
             }
         },
 
+        updateLastAssistantResponseType: (state, action) => {
+            const last = state.messages[state.messages.length - 1];
+
+            if (last?.role === "assistant") {
+                last.responseType = action.payload
+            }
+        },
+
         setStreaming(state, action: PayloadAction<boolean>) {
             state.streaming = action.payload
         }
@@ -121,6 +129,7 @@ export const {
     updateConversation,
     appendToLastAssistantMessage,
     updateLastAssistantMessage,
+    updateLastAssistantResponseType,
     setStreaming
 } = conversationSlice.actions;
 

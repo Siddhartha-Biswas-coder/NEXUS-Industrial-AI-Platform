@@ -27,6 +27,11 @@ const messageSchema = new mongoose.Schema(
         score: Number,
       },
     ],
+
+    responseType: {
+      type: String,
+      enum: ["rag", "general", "hybrid"]
+    }
   },
   {
     timestamps: true,
