@@ -5,6 +5,8 @@ import { chatSchema } from "../validators/chat.validator"
 import { askQuestionStream } from "../services/chat.service"
 import MessageModel from "../models/message.model"
 
+import ConversationModel from "../models/conversation.model"
+
 export const streamChatController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
 
@@ -19,7 +21,7 @@ export const streamChatController = asyncHandler(
         //Stream started
         res.write(`data: ${JSON.stringify({ type: "start", conversationId })}\n\n`);
 
-        const { stream, conversation, sources } = await askQuestionStream({
+        const { stream, conversation, sources, responseType } = await askQuestionStream({
             conversationId,
             question,
             userId: req.user!.id
@@ -46,18 +48,15 @@ export const streamChatController = asyncHandler(
         })
 
         conversation.lastMessageAt = new Date()
-        await conversation.save()
+        await ConversationModel.findByIdAndUpdate(conversationId, {
+            lastMessageAt: conversation.lastMessageAt,
+        })
 
         // Send updated conversation metadata
         res.write(
             `data: ${JSON.stringify({
                 type: "conversation",
-                conversation: {
-                    _id: conversation.id,
-                    title: conversation.title,
-                    lastMessageAt: conversation.lastMessageAt,
-                    createdAt: conversation.createdAt,
-                },
+                conversation,
             })}\n\n`
         );
 
@@ -66,6 +65,13 @@ export const streamChatController = asyncHandler(
             `data: ${JSON.stringify({
                 type: "sources",
                 sources,
+            })}\n\n`
+        );
+
+        res.write(
+            `data: ${JSON.stringify({
+                type: "responseType",
+                responseType,
             })}\n\n`
         );
 

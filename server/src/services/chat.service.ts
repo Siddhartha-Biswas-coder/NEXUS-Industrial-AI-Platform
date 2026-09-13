@@ -3,22 +3,37 @@ import config from "../config/config.ts";
 import ConversationModel from "../models/conversation.model.ts";
 import MessageModel from "../models/message.model.ts";
 import { llm } from "./llm/index.ts";
-import { buildGeneralPrompt, buildRAGPrompt } from "./prompt.service.ts";
+import { buildGeneralPrompt, buildRAGPrompt, buildHybridPrompt } from "./prompt.service.ts";
 import { retrievedRelevantChunks } from "./retrieval.service.ts";
+
+export type ResponseType = "rag" | "general" | "hybrid";
+
+interface Source {
+  documentId: string;
+  chunkIndex: number;
+  score: number;
+}
+
+interface ConversationSummary {
+  _id: string;
+  title: string;
+  lastMessageAt: Date;
+  createdAt: Date;
+}
 
 interface ChatResponse {
   answer: string;
-  sources: {
-    documentId: string;
-    chunkIndex: number;
-    score: number;
-  }[];
-  conversation: {
-    _id: string;
-    title: string;
-    lastMessageAt: Date;
-    createdAt: Date;
-  }
+  responseType: ResponseType;
+  sources: Source[];
+  conversation: ConversationSummary;
+}
+
+interface StreamChatResponse {
+  stream: AsyncGenerator<string>;
+  conversation: ConversationSummary;
+  sources: Source[];
+  responseType: ResponseType;
+
 }
 
 interface ChatData {
@@ -58,6 +73,9 @@ export const askQuestion = async ({
 
   const bestScore = matches[0]?.score ?? 0;
   const useRAG = bestScore >= config.RAG_THRESHOLD
+  const responseType: ResponseType = useRAG
+    ? "rag"
+    : "general"
 
   const context = useRAG
     ? matches
@@ -67,31 +85,14 @@ export const askQuestion = async ({
     : "";
 
   const prompt = useRAG
-    ? `
-      You are Nexus, an AI knowledge assistant.
-
-      Rules:
-      - Prioritize the provided document context.
-      - If the context fully answers the question, answer from it.
-      - If the context is incomplete, clearly separate document-based information from general knowledge.
-
-      Context:
-      --------------------
-      ${context}
-      --------------------
-
-      Question:
-      ${question}
-      `
+    ? buildRAGPrompt({
+      question,
+      context
+    })
     :
-    `
-      You are Nexus, a helpful AI assistant.
-
-      Answer the user's question using your general knowledge.
-
-      Question:
-      ${question}
-    `;
+    buildGeneralPrompt({
+      question
+    })
 
   const answer = await llm.generate({ prompt });
 
@@ -115,6 +116,7 @@ export const askQuestion = async ({
 
   return {
     answer: answer.trim(),
+    responseType,
     sources,
     conversation: {
       _id: conversation.id,
@@ -129,7 +131,7 @@ export const askQuestionStream = async ({
   conversationId,
   question,
   userId,
-}: ChatData) => {
+}: ChatData): Promise<StreamChatResponse> => {
   const conversation = await ConversationModel.findById(conversationId);
 
   if (!conversation) {
@@ -147,12 +149,16 @@ export const askQuestionStream = async ({
       question.length > 40
         ? question.slice(0, 40).trim() + "..."
         : question.trim();
+    await conversation.save();
   }
 
   const matches = await retrievedRelevantChunks(question, userId);
 
   const bestScore = matches[0]?.score ?? 0;
   const useRAG = bestScore >= config.RAG_THRESHOLD;
+  const responseType: ResponseType = useRAG
+    ? "rag"
+    : "general"
 
   const context = useRAG
     ? matches
@@ -181,7 +187,13 @@ export const askQuestionStream = async ({
 
   return {
     stream: llm.streamGenerate({ prompt }),
-    conversation,
+    conversation: {
+      _id: conversation.id,
+      title: conversation.title,
+      lastMessageAt: conversation.lastMessageAt,
+      createdAt: conversation.createdAt
+    },
     sources,
+    responseType,
   };
 };
