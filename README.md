@@ -1,12 +1,14 @@
 # Nexus — Industrial AI Knowledge Platform
 
-> An enterprise-grade Retrieval-Augmented Generation (RAG) platform designed to transform complex engineering documents, manuals, and technical research into an instant, context-aware AI knowledge assistant.
+> An enterprise-grade Retrieval-Augmented Generation (RAG) platform designed to transform complex engineering documents, manuals, and technical research into an instant, context-aware AI knowledge assistant powered by local & cloud LLMs.
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
 ![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=node.js)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi)
+![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?logo=ollama)
+![Groq](https://img.shields.io/badge/Groq-LPU_Inference-orange)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)
 ![Pinecone](https://img.shields.io/badge/Pinecone-Vector_DB-purple)
 
@@ -16,15 +18,20 @@
 
 **Nexus** bridges the gap between massive unstructured engineering documentation and actionable insights. Instead of manually navigating through hundreds of technical PDFs, maintenance manuals, standard operating procedures (SOPs), or research papers, Nexus enables engineers and operators to query their documentation using natural language.
 
-Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, stores vectors in **Pinecone** for sub-100ms similarity search, and presents zero-hallucination contextual responses with exact source citations and ChatGPT-style multi-conversation management.
+Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline, Nexus extracts document content, performs semantic chunking, generates high-dimensional vector embeddings, stores vectors in **Pinecone** for sub-100ms similarity search, and synthesizes grounded contextual responses using a **Pluggable Multi-LLM Provider System** (Ollama Llama 3.2, Groq, OpenAI) with exact source citations and ChatGPT-style multi-conversation management.
 
 ---
 
 ## ✨ Key Features
 
+### 🧠 Pluggable Multi-LLM Engine
+* **Local & Privacy-First (Ollama)**: Run inference completely offline and locally using Ollama (`llama3.2:3b` or custom models) with zero data egress.
+* **Ultra-Fast Cloud Inference (Groq & OpenAI)**: Seamlessly switch providers via environment configuration to use Groq LPU speed or OpenAI GPT models.
+* **Grounded Synthesis**: Context-bound prompts ensure responses rely strictly on retrieved document chunks to eliminate hallucinations.
+
 ### 💬 RAG AI Assistant & Multi-Conversation Management
 * **ChatGPT-Style Multi-Chat History**: Create, switch, rename, and delete conversations with persistent MongoDB storage.
-* **Smart Auto-Titling**: Automatically generates clean conversation titles from the user's first query or enables quick inline renaming.
+* **Smart Auto-Titling**: Automatically generates clean conversation titles from the user's initial prompt or allows quick inline renaming.
 * **URL-Based Conversation Routing**: Deep-link support for `/chat` (new draft chat) and `/chat/:conversationId` for active chat sessions.
 * **LangChain Semantic Chunking**: Intelligently splits long-form technical PDFs using `RecursiveCharacterTextSplitter`.
 * **FastAPI Local Embedding Microservice**: Generates 384-dimensional dense vectors using HuggingFace's `sentence-transformers/all-MiniLM-L6-v2`.
@@ -65,13 +72,13 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
                                   │      (Node.js + TS)    │
                                   └────┬───────────┬───────┘
                                        │           │
-           ┌───────────────────────────┘           └───────────────────────────┐
-           │ Extract & Split Text                                              │ Read/Write
-           ▼                                                                   ▼
-┌─────────────────────────────┐                                     ┌────────────────────┐
-│ FastAPI Embedding Service   │                                     │   MongoDB Atlas    │
-│ (all-MiniLM-L6-v2 Vectors)  │                                     │ (Users, Docs,      │
-└──────────┬──────────────────┘                                     │  Chunks, Chats)    │
+           ┌───────────────────────────┴┐          └───────────────────────────┐
+           │ Extract & Split Text       │                                      │ Read/Write
+           ▼                            ▼                                      ▼
+┌─────────────────────────────┐  ┌─────────────────────────────┐    ┌────────────────────┐
+│ FastAPI Embedding Service   │  │   Pluggable LLM Engine      │    │   MongoDB Atlas    │
+│ (all-MiniLM-L6-v2 Vectors)  │  │ (Ollama / Groq / OpenAI)    │    │ (Users, Docs,      │
+└──────────┬──────────────────┘  └─────────────────────────────┘    │  Chunks, Chats)    │
            │ 384-dim Vectors                                        └────────────────────┘
            ▼
 ┌─────────────────────────────┐
@@ -89,6 +96,7 @@ Powered by a production-scale **Retrieval-Augmented Generation (RAG)** pipeline,
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion, Lucide React, Redux Toolkit, React Router v7 |
 | **Backend API** | Node.js, Express 5, TypeScript, LangChain, Multer, `pdf-parse`, JWT, Cookie-Parser, Zod |
 | **AI & Vector Service** | Python 3.10+, FastAPI, SentenceTransformers (`all-MiniLM-L6-v2`), Uvicorn |
+| **LLM Inference** | Ollama (`llama3.2:3b`), Groq API, OpenAI API |
 | **Vector DB & Database** | Pinecone Serverless Index, MongoDB Atlas (Mongoose) |
 | **Tooling & Quality** | Oxlint, TSX, Git, npm |
 
@@ -112,12 +120,13 @@ nexus/
 │
 ├── server/                     # Express 5 Backend API
 │   ├── src/
-│   │   ├── config/             # Environment & Pinecone / DB configs
+│   │   ├── config/             # Environment & Pinecone / DB / LLM configs
 │   │   ├── controllers/        # Express controllers (auth, documents, chat, conversation)
 │   │   ├── middlewares/        # Authentication, validation, and error middlewares
 │   │   ├── models/             # Mongoose schemas (User, Document, Chunk, Conversation, Message)
 │   │   ├── routes/             # Router endpoints (auth, documents, chat, conversation)
-│   │   ├── services/           # Business logic (RAG ingestion, vector search, Q&A)
+│   │   ├── services/           # Business logic (RAG ingestion, vector search, LLM provider routing)
+│   │   │   └── llm/            # Pluggable LLM Providers (Ollama, Groq, OpenAI)
 │   │   └── validators/         # Zod schemas
 │   └── package.json
 │
@@ -157,7 +166,7 @@ nexus/
 ### AI Assistant Chat (`/api/chat`)
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :---: |
-| `POST` | `/api/chat` | Send question with conversation context, retrieve vector chunks, & persist message response | ✅ |
+| `POST` | `/api/chat` | Send question with conversation context, retrieve vector chunks, & synthesize response | ✅ |
 
 ---
 
@@ -167,12 +176,23 @@ nexus/
 Make sure you have the following installed locally:
 * **Node.js** (v18.x or higher)
 * **Python** (v3.10 or higher)
+* **Ollama** (for local LLM execution, `llama3.2:3b` model)
 * **MongoDB** connection string (MongoDB Atlas)
 * **Pinecone** API Key & Index Name (384 dimensions, Cosine metric)
 
 ---
 
-### 1. Setup Embedding Service (FastAPI)
+### 1. Setup Local LLM (Ollama)
+
+Install [Ollama](https://ollama.com/) and pull the default Llama 3.2 model:
+
+```bash
+ollama run llama3.2:3b
+```
+
+---
+
+### 2. Setup Embedding Service (FastAPI)
 
 ```bash
 cd embedding-service
@@ -189,7 +209,7 @@ uvicorn main:app --port 8000 --reload
 
 ---
 
-### 2. Setup Backend Server (Express)
+### 3. Setup Backend Server (Express)
 
 Create a `.env` file inside the `server/` directory:
 
@@ -201,6 +221,15 @@ CORS_ORIGIN=http://localhost:5173
 PINECONE_API_KEY=your_pinecone_api_key
 PINECONE_INDEX_NAME=nexus-index
 EMBEDDING_SERVICE_URL=http://localhost:8000
+
+# Pluggable LLM Configuration (ollama | groq | openai)
+LLM_PROVIDER=ollama
+OLLAMA_URL=http://127.0.0.1:11434
+LLM_MODEL=llama3.2:3b
+
+# Optional Cloud LLM Keys:
+# GROQ_API_KEY=your_groq_api_key
+# OPENAI_API_KEY=your_openai_api_key
 ```
 
 Install dependencies and start the backend development server:
@@ -213,7 +242,7 @@ npm run dev
 
 ---
 
-### 3. Setup Frontend Client (React)
+### 4. Setup Frontend Client (React)
 
 ```bash
 cd client
