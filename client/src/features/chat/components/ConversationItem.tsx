@@ -11,6 +11,7 @@ interface ConversationItemProps {
   menuOpen: boolean;
   onMenuToggle: (id: string) => void;
   onMenuClose: () => void;
+  onDelete: (conversation: Conversation) => void;
 }
 
 function ConversationItem({
@@ -21,6 +22,7 @@ function ConversationItem({
   menuOpen,
   onMenuToggle,
   onMenuClose,
+  onDelete,
 }: ConversationItemProps) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(conversation.title);
@@ -140,6 +142,7 @@ function ConversationItem({
                 transition={{ duration: 0.2 }}
                 onClick={(e) => {
                   e.stopPropagation();
+                  onDelete(conversation);
                   onMenuClose();
                 }}
                 className="w-full px-3 py-2 text-xs font-medium rounded-xl flex items-center gap-2.5 hover:bg-red-500/10 text-red-400 transition-all duration-200 group/item cursor-pointer text-left"

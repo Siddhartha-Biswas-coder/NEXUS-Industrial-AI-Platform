@@ -22,6 +22,11 @@ interface UpdateConversationData {
     title: string;
 }
 
+interface DeleteConversationData {
+    conversationId: string;
+    userId: string;
+}
+
 export const createConversation = async ({
     userId,
     title,
@@ -32,7 +37,7 @@ export const createConversation = async ({
     });
 };
 
-export const GetConversations = async ({
+export const getConversations = async ({
     userId
 }: GetConversationsData) => {
     return ConversationModel.find({
@@ -41,7 +46,7 @@ export const GetConversations = async ({
         .select("_id title lastMessageAt createdAt")
 }
 
-export const GetMessages = async ({
+export const getMessages = async ({
     conversationId,
     userId,
 }: GetMessagesData) => {
@@ -81,6 +86,28 @@ export const updateConversationTitle = async ({
     if (!conversation) {
         throw new Error("Conversation not found")
     }
+
+    return conversation
+}
+
+export const deleteConversation = async ({
+    conversationId,
+    userId
+}: DeleteConversationData) => {
+    const conversation = await ConversationModel.findOne({
+        _id: conversationId,
+        owner: userId,
+    })
+
+    if (!conversation) {
+        return null;
+    }
+
+    await MessageModel.deleteMany({
+        chat: conversationId
+    })
+
+    await conversation.deleteOne()
 
     return conversation
 }

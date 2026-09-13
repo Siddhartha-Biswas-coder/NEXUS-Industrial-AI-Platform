@@ -7,21 +7,30 @@ import {
   Cpu,
   Sparkles,
   Plus,
+  Trash2,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../auth/hooks/useAuth";
 import useConversations from "../../chat/hooks/useConversations";
 import ConversationItem from "../../chat/components/ConversationItem";
 import { useCallback, useState } from "react";
+import { createPortal } from "react-dom";
+import type { Conversation } from "../../chat/types/conversation.types";
 
 export default function Sidebar() {
   const { logoutUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { conversations, activeConversation, loading, renameConversationById } =
-    useConversations();
+  const {
+    conversations,
+    activeConversation,
+    loading,
+    renameConversationById,
+    deleteConversationById,
+  } = useConversations();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
 
   const isChatPage = location.pathname.startsWith("/chat");
 
@@ -37,6 +46,21 @@ export default function Sidebar() {
     },
     [navigate],
   );
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+
+    const updatedConversations = await deleteConversationById(deleteTarget._id);
+
+    setDeleteTarget(null);
+    setOpenMenuId(null);
+
+    if (updatedConversations.length > 0) {
+      navigate(`/chat/${updatedConversations[0]._id}`);
+    } else {
+      navigate(`/chat`);
+    }
+  }, [deleteTarget, deleteConversationById, navigate]);
 
   return (
     <aside className="w-[288px] h-full rounded-2xl md:rounded-3xl border border-white/10 bg-zinc-950/70 backdrop-blur-2xl flex flex-col p-4 overflow-hidden select-none z-30 shrink-0 shadow-xl shadow-black/40">
@@ -172,6 +196,10 @@ export default function Sidebar() {
                       setOpenMenuId((prev) => (prev === id ? null : id))
                     }
                     onMenuClose={() => setOpenMenuId(null)}
+                    onDelete={(conversation) => {
+                      setDeleteTarget(conversation);
+                      setOpenMenuId(null);
+                    }}
                   />
                 ))
               )}
@@ -179,6 +207,67 @@ export default function Sidebar() {
           </div>
         )}
       </div>
+
+      {/* ===== DELETE CONFIRMATION MODAL ===== */}
+      {createPortal(
+        <AnimatePresence>
+          {deleteTarget && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+              onClick={() => setDeleteTarget(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, y: 10 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 10 }}
+                transition={{ duration: 0.18 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900/95 p-6 shadow-2xl"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <Trash2 className="h-5 w-5 text-red-400" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-white font-semibold">
+                      Delete Conversation
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-zinc-300 mb-6">
+                  Delete{" "}
+                  <span className="font-semibold">"{deleteTarget.title}"</span>?
+                </p>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setDeleteTarget(null)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white transition cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Logout */}
       <div className="relative z-10 pt-4 border-t border-white/10">

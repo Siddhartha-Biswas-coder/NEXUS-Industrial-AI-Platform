@@ -2,7 +2,7 @@ import { Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler.ts";
 import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 import ApiResponse from "../utils/ApiResponse.ts";
-import { createConversation, GetConversations, GetMessages, updateConversationTitle } from "../services/conversation.service.ts";
+import { createConversation, deleteConversation, getConversations, getMessages, updateConversationTitle } from "../services/conversation.service.ts";
 import { conversationParamsSchema, createConversationSchema, updateConversationSchema } from "../validators/conversation.validator.ts";
 
 export const createConversationController = asyncHandler(
@@ -24,9 +24,9 @@ export const createConversationController = asyncHandler(
     }
 );
 
-export const GetConversationsController = asyncHandler(
+export const getConversationsController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
-        const conversations = await GetConversations({
+        const conversations = await getConversations({
             userId: req.user!.id,
         })
 
@@ -40,11 +40,11 @@ export const GetConversationsController = asyncHandler(
     }
 )
 
-export const GetMessagesController = asyncHandler(
+export const getMessagesController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
         const { conversationId } = conversationParamsSchema.parse(req.params);
 
-        const messages = await GetMessages({
+        const messages = await getMessages({
             conversationId,
             userId: req.user!.id,
         });
@@ -75,6 +75,25 @@ export const updateConversationTitleController = asyncHandler(
                 200,
                 conversation,
                 "Conversation updated successfully"
+            )
+        )
+    }
+)
+
+export const deleteConversationController = asyncHandler(
+    async (req: AuthRequest, res: Response) => {
+        const { conversationId } = conversationParamsSchema.parse(req.params);
+
+        const conversation = await deleteConversation({
+            conversationId,
+            userId: req.user!.id,
+        })
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                conversation,
+                "Conversation deleted successfully"
             )
         )
     }

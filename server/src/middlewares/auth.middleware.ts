@@ -7,7 +7,7 @@ export interface AuthRequest extends Request {
     user?: Express.UserPayload;
 }
 
-const authMiddelware = (req: AuthRequest, res: Response, next: NextFunction) => {
+const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
     const token = req.cookies?.token;
 
     if (!token) {
@@ -28,4 +28,4 @@ const authMiddelware = (req: AuthRequest, res: Response, next: NextFunction) => 
     }
 }
 
-export default authMiddelware
+export default authMiddleware

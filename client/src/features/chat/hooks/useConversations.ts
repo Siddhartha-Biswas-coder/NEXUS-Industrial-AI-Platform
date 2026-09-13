@@ -10,6 +10,7 @@ import {
 
 import {
   createConversation,
+  deleteConversation,
   getConversations,
   getMessages,
   renameConversation,
@@ -102,6 +103,26 @@ export default function useConversations() {
     [dispatch, conversations, activeConversation]
   )
 
+  const deleteConversationById = useCallback(
+    async (conversationId: string) => {
+      await deleteConversation(conversationId);
+
+      const updatedConversations = conversations.filter(
+        (conversation) => conversation._id !== conversationId
+      )
+
+      dispatch(setConversations(updatedConversations));
+
+      if (activeConversation?._id === conversationId) {
+        dispatch(setActiveConversation(null));
+        dispatch(setMessages([]));
+      }
+
+      return updatedConversations
+    },
+    [dispatch, conversations, activeConversation]
+  )
+
   return {
     conversations,
     activeConversation,
@@ -110,6 +131,7 @@ export default function useConversations() {
     loadConversations,
     selectConversation,
     createNewConversation,
-    renameConversationById
+    renameConversationById,
+    deleteConversationById
   };
 }

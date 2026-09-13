@@ -24,3 +24,8 @@ export const renameConversation = async (
 
     return response.data.data
 }
+
+export const deleteConversation = async (conversationId: string) => {
+    const response = await api.delete(`/conversations/${conversationId}`);
+    return response.data.data
+}
