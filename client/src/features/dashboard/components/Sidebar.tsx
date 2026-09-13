@@ -1,21 +1,14 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  FolderOpen,
-  MessageSquare,
-  LogOut,
-  Cpu,
-  Sparkles,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../../auth/hooks/useAuth";
-import useConversations from "../../chat/hooks/useConversations";
-import ConversationItem from "../../chat/components/ConversationItem";
 import { useCallback, useState } from "react";
-import { createPortal } from "react-dom";
-import type { Conversation } from "../../chat/types/conversation.types";
+import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import useConversations from "@/features/chat/hooks/useConversations";
+import SidebarLogo from "./SidebarLogo";
+import SidebarNavigation from "./SidebarNavigation";
+import ConversationSection from "./ConversationSection";
+import DeleteConversationModal from "./DeleteConversationModal";
+import type { Conversation } from "@/features/chat/types/conversation.types";
 
 export default function Sidebar() {
   const { logoutUser } = useAuth();
@@ -29,29 +22,27 @@ export default function Sidebar() {
     renameConversationById,
     deleteConversationById,
   } = useConversations();
+
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
 
   const isChatPage = location.pathname.startsWith("/chat");
 
-  const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "Documents", path: "/documents", icon: FolderOpen },
-    { name: "AI Chat", path: "/chat", icon: MessageSquare },
-  ];
-
   const handleConversationSelect = useCallback(
     (id: string) => {
       navigate(`/chat/${id}`);
     },
-    [navigate],
+    [navigate]
   );
+
+  const handleNewChat = useCallback(() => {
+    navigate("/chat");
+  }, [navigate]);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
 
     const updatedConversations = await deleteConversationById(deleteTarget._id);
-
     setDeleteTarget(null);
     setOpenMenuId(null);
 
@@ -64,212 +55,43 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[288px] h-full rounded-2xl md:rounded-3xl border border-white/10 bg-zinc-950/70 backdrop-blur-2xl flex flex-col p-4 overflow-hidden select-none z-30 shrink-0 shadow-xl shadow-black/40">
-      {/* Ambient Glows */}
+      {/* Ambient Background Glows */}
       <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Scrollable Content */}
+      {/* Main Content Area */}
       <div className="relative z-10 flex-1 flex flex-col min-h-0 space-y-6">
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/10 backdrop-blur-md shadow-lg shadow-black/40 flex items-center justify-between group hover:border-cyan-500/30 transition-all duration-300 cursor-pointer"
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 via-blue-600 to-purple-600 p-0.5">
-              <div className="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-cyan-400" />
-              </div>
-            </div>
+        <SidebarLogo />
+        <SidebarNavigation />
 
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-extrabold tracking-wider text-white">
-                  NEXUS
-                </h1>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  AI
-                </span>
-              </div>
-
-              <p className="text-[11px] text-zinc-400 font-medium">
-                Industrial AI Platform
-              </p>
-            </div>
-          </div>
-
-          <div className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-          </div>
-        </motion.div>
-
-        {/* Navigation */}
-        <nav className="space-y-1.5">
-          <div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            Main Menu
-          </div>
-
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                className="block relative rounded-xl"
-              >
-                {({ isActive }) => (
-                  <motion.div
-                    whileHover={{ x: 3 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`relative flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                      isActive
-                        ? "text-cyan-300 font-semibold"
-                        : "text-zinc-400 hover:text-white hover:bg-white/4"
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNavBackground"
-                        className="absolute inset-0 rounded-xl bg-linear-to-r from-cyan-500/20 via-blue-500/15 to-purple-500/10 border border-cyan-500/40"
-                      />
-                    )}
-
-                    <Icon className="relative z-10 w-5 h-5" />
-
-                    <span className="relative z-10">{item.name}</span>
-
-                    {isActive && (
-                      <Sparkles className="relative z-10 ml-auto w-3.5 h-3.5 text-cyan-400" />
-                    )}
-                  </motion.div>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        {/* Conversations */}
         {isChatPage && (
-          <div className="flex-1 flex flex-col min-h-0 border-t border-white/10 pt-5">
-            <div className="flex items-center justify-between px-2 mb-3">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-                Conversations
-              </span>
-
-              <button
-                onClick={async () => {
-                  navigate(`/chat`);
-                }}
-                className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-cyan-300 transition cursor-pointer"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-1 space-y-1">
-              {conversations.length === 0 ? (
-                loading ? (
-                  <p className="text-xs text-zinc-500 px-2">Loading...</p>
-                ) : (
-                  <p className="text-xs text-zinc-500 px-2">
-                    No conversations yet.
-                  </p>
-                )
-              ) : (
-                conversations.map((conversation) => (
-                  <ConversationItem
-                    key={conversation._id}
-                    conversation={conversation}
-                    active={activeConversation?._id === conversation._id}
-                    onSelect={handleConversationSelect}
-                    onRename={renameConversationById}
-                    menuOpen={openMenuId === conversation._id}
-                    onMenuToggle={(id) =>
-                      setOpenMenuId((prev) => (prev === id ? null : id))
-                    }
-                    onMenuClose={() => setOpenMenuId(null)}
-                    onDelete={(conversation) => {
-                      setDeleteTarget(conversation);
-                      setOpenMenuId(null);
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </div>
+          <ConversationSection
+            conversations={conversations}
+            activeConversation={activeConversation}
+            loading={loading}
+            openMenuId={openMenuId}
+            onNewChat={handleNewChat}
+            onSelect={handleConversationSelect}
+            onRename={renameConversationById}
+            onMenuToggle={(id) => setOpenMenuId((prev) => (prev === id ? null : id))}
+            onMenuClose={() => setOpenMenuId(null)}
+            onDelete={(conversation) => {
+              setDeleteTarget(conversation);
+              setOpenMenuId(null);
+            }}
+          />
         )}
       </div>
 
-      {/* ===== DELETE CONFIRMATION MODAL ===== */}
-      {createPortal(
-        <AnimatePresence>
-          {deleteTarget && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-              onClick={() => setDeleteTarget(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, y: 10 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 10 }}
-                transition={{ duration: 0.18 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900/95 p-6 shadow-2xl"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <Trash2 className="h-5 w-5 text-red-400" />
-                  </div>
+      {/* Delete Confirmation Modal (Portaled to document.body) */}
+      <DeleteConversationModal
+        deleteTarget={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+      />
 
-                  <div>
-                    <h3 className="text-white font-semibold">
-                      Delete Conversation
-                    </h3>
-                    <p className="text-xs text-zinc-400">
-                      This action cannot be undone.
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-zinc-300 mb-6">
-                  Delete{" "}
-                  <span className="font-semibold">"{deleteTarget.title}"</span>?
-                </p>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setDeleteTarget(null)}
-                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    onClick={handleDeleteConfirm}
-                    className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white transition cursor-pointer"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
-
-      {/* Logout */}
+      {/* Footer Logout Button */}
       <div className="relative z-10 pt-4 border-t border-white/10">
         <motion.button
           onClick={logoutUser}

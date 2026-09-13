@@ -1,8 +1,8 @@
 import { FileText, ExternalLink } from "lucide-react";
-import type { Source } from "../types/chats.types";
+import type { MessageSource } from "../types/conversation.types";
 
 interface SourceCardProps {
-  source: Source;
+  source: MessageSource;
 }
 
 export default function SourceCard({ source }: SourceCardProps) {

@@ -1,4 +1,4 @@
-import type { Message } from "../types/chats.types";
+import type { Message, MessageSource } from "../types/conversation.types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
 import { Sparkles, User, BookOpen } from "lucide-react";
@@ -13,39 +13,30 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`flex items-start gap-3 md:gap-4 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`flex gap-3.5 ${isUser ? "flex-row-reverse" : "flex-row"} mb-6 group`}
     >
-      {/* Avatar Icon */}
-      {isUser ? (
-        <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 mt-0.5 shadow-sm">
-          <User className="w-4 h-4 text-cyan-300" />
-        </div>
-      ) : (
-        <div className="w-8 h-8 rounded-xl bg-linear-to-br from-cyan-500/25 to-teal-500/15 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-          <Sparkles className="w-4 h-4 text-cyan-400" />
-        </div>
-      )}
-
-      {/* Message Bubble Container */}
       <div
-        className={`max-w-[85%] sm:max-w-[80%] rounded-2xl ${
+        className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${
           isUser
-            ? "bg-linear-to-r from-cyan-400 via-cyan-300 to-teal-300 text-zinc-950 font-medium rounded-tr-xs px-5 py-3.5 shadow-[0_4px_20px_rgba(6,182,212,0.25)] text-sm md:text-[15px]"
-            : "bg-zinc-900/90 border border-zinc-800/90 text-zinc-100 rounded-tl-xs px-5 py-4 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.4)] text-sm md:text-[15px] leading-relaxed"
+            ? "bg-linear-to-tr from-cyan-500 to-blue-600 text-white"
+            : "bg-zinc-900 border border-white/10 text-cyan-400"
         }`}
       >
-        {!isUser && (
-          <div className="flex items-center gap-2 mb-2 text-xs font-semibold tracking-wide text-cyan-400 uppercase">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Nexus AI</span>
-          </div>
-        )}
+        {isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+      </div>
 
+      <div
+        className={`max-w-[85%] sm:max-w-[75%] rounded-3xl p-4 sm:p-5 shadow-lg backdrop-blur-md border ${
+          isUser
+            ? "bg-cyan-500/10 border-cyan-500/30 text-white rounded-tr-sm"
+            : "bg-zinc-900/80 border-white/10 text-zinc-100 rounded-tl-sm"
+        }`}
+      >
         {isUser ? (
-          <p className="whitespace-pre-wrap leading-relaxed">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap font-normal">
             {message.content}
           </p>
         ) : (
@@ -60,7 +51,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {message.sources.map((source, index) => (
+              {message.sources.map((source: MessageSource, index: number) => (
                 <SourceCard key={index} source={source} />
               ))}
             </div>

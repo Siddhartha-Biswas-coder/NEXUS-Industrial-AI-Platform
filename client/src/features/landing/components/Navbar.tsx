@@ -5,8 +5,15 @@ import { Cpu, Menu, X, ArrowRight, Sparkles } from "lucide-react";
 import { useAppSelector } from "../../../shared/hooks";
 
 export const Navbar = () => {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "U";
 
   const navLinks = [
     { name: "Features", href: "#features" },
@@ -60,11 +67,23 @@ export const Navbar = () => {
           {isAuthenticated ? (
             <Link
               to="/dashboard"
-              className="relative inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-linear-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/35 border border-white/10 group"
+              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/70 px-3.5 py-2 backdrop-blur-md shadow-md hover:border-cyan-500/30 hover:bg-zinc-900 transition-all duration-300 group cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-cyan-200 animate-pulse" />
-              <span>Go to Dashboard</span>
-              <ArrowRight className="w-4 h-4 text-cyan-200 group-hover:translate-x-1 transition-transform duration-200" />
+              <div className="relative shrink-0 w-9 h-9 rounded-xl bg-linear-to-tr from-cyan-500 via-blue-500 to-purple-600 p-0.5 shadow-md shadow-cyan-500/20">
+                <div className="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center font-bold text-xs text-cyan-300">
+                  {initials}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-zinc-950 rounded-full" />
+              </div>
+
+              <div className="text-left">
+                <p className="text-xs font-semibold text-white group-hover:text-cyan-300 transition-colors leading-tight">
+                  {user?.name || "Engineer"}
+                </p>
+                <p className="text-[11px] text-zinc-400 capitalize font-medium leading-tight">
+                  {user?.role || "User"}
+                </p>
+              </div>
             </Link>
           ) : (
             <>
@@ -124,10 +143,23 @@ export const Navbar = () => {
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-white py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-purple-600 shadow-lg shadow-cyan-500/20"
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900 px-4 py-2.5 shadow-md hover:border-cyan-500/30 transition-all duration-200"
                 >
-                  <span>Go to Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <div className="relative shrink-0 w-9 h-9 rounded-xl bg-linear-to-tr from-cyan-500 via-blue-500 to-purple-600 p-0.5 shadow-md shadow-cyan-500/20">
+                    <div className="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center font-bold text-xs text-cyan-300">
+                      {initials}
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-zinc-950 rounded-full" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="text-xs font-semibold text-white">
+                      {user?.name || "Engineer"}
+                    </p>
+                    <p className="text-[11px] text-zinc-400 capitalize font-medium">
+                      {user?.role || "User"}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-cyan-400" />
                 </Link>
               ) : (
                 <>

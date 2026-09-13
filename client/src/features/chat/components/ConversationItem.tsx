@@ -1,13 +1,15 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useClickOutside } from "@/shared/hooks";
+import { formatDate } from "@/shared/utils";
 import type { Conversation } from "../types/conversation.types";
 
 interface ConversationItemProps {
   conversation: Conversation;
   active: boolean;
   onSelect: (id: string) => void;
-  onRename: (id: string, title: string) => Promise<void>;
+  onRename: (id: string, title: string) => Promise<boolean | void>;
   menuOpen: boolean;
   onMenuToggle: (id: string) => void;
   onMenuClose: () => void;
@@ -26,6 +28,11 @@ function ConversationItem({
 }: ConversationItemProps) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(conversation.title);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useClickOutside(menuRef, () => {
+    if (menuOpen) onMenuClose();
+  });
 
   useEffect(() => {
     setTitle(conversation.title);
@@ -33,23 +40,15 @@ function ConversationItem({
 
   const saveTitle = async () => {
     const nextTitle = title.trim();
-
     if (!nextTitle || nextTitle === conversation.title) {
       setTitle(conversation.title);
       setEditing(false);
       return;
     }
-
     await onRename(conversation._id, nextTitle);
     setEditing(false);
     onMenuClose();
   };
-
-  useEffect(() => {
-    const handleClick = () => onMenuClose();
-    window.addEventListener("click", handleClick);
-    return () => window.removeEventListener("click", handleClick);
-  }, [onMenuClose]);
 
   return (
     <div
@@ -70,12 +69,10 @@ function ConversationItem({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={async (e) => {
               e.stopPropagation();
-
               if (e.key === "Enter") {
                 e.preventDefault();
                 await saveTitle();
               }
-
               if (e.key === "Escape") {
                 setTitle(conversation.title);
                 setEditing(false);
@@ -90,7 +87,6 @@ function ConversationItem({
             <p className="truncate text-sm font-medium flex-1">
               {conversation.title}
             </p>
-
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -111,6 +107,7 @@ function ConversationItem({
         <AnimatePresence>
           {menuOpen && !editing && (
             <motion.div
+              ref={menuRef}
               initial={{ opacity: 0, scale: 0.96, y: -6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: -6 }}
@@ -118,48 +115,36 @@ function ConversationItem({
               onClick={(e) => e.stopPropagation()}
               className="absolute right-0 top-full mt-1.5 w-44 rounded-2xl border border-white/10 bg-zinc-900/90 backdrop-blur-xl shadow-2xl shadow-black/60 z-50 p-1.5 overflow-hidden"
             >
-              <motion.button
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setEditing(true);
                   onMenuClose();
                 }}
-                className="w-full px-3 py-2 text-xs font-medium rounded-xl flex items-center gap-2.5 hover:bg-white/5 text-zinc-300 hover:text-white transition-all duration-200 group/item cursor-pointer text-left"
+                className="w-full px-3 py-2 text-xs font-medium rounded-xl flex items-center gap-2.5 hover:bg-white/5 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer text-left"
               >
-                <Pencil
-                  size={14}
-                  className="text-zinc-400 group-hover/item:text-cyan-300 group-hover/item:scale-105 transition-all duration-200"
-                />
+                <Pencil size={14} className="text-zinc-400" />
                 <span>Rename</span>
-              </motion.button>
-
+              </button>
               <div className="my-1 border-t border-white/10" />
-
-              <motion.button
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(conversation);
                   onMenuClose();
                 }}
-                className="w-full px-3 py-2 text-xs font-medium rounded-xl flex items-center gap-2.5 hover:bg-red-500/10 text-red-400 transition-all duration-200 group/item cursor-pointer text-left"
+                className="w-full px-3 py-2 text-xs font-medium rounded-xl flex items-center gap-2.5 hover:bg-red-500/10 text-red-400 transition-all duration-200 cursor-pointer text-left"
               >
-                <Trash2
-                  size={14}
-                  className="text-red-400/80 group-hover/item:text-red-400 group-hover/item:scale-105 transition-all duration-200"
-                />
+                <Trash2 size={14} className="text-red-400/80" />
                 <span>Delete</span>
-              </motion.button>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <p className="text-[11px] text-zinc-500 mt-1">
-        {new Date(conversation.lastMessageAt).toLocaleDateString()}
+        {formatDate(conversation.lastMessageAt)}
       </p>
     </div>
   );
