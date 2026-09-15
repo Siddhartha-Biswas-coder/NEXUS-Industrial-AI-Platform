@@ -3,12 +3,14 @@ import type { MessageSource } from "../types/conversation.types";
 
 interface SourceCardProps {
   source: MessageSource;
+  onClick: () => void;
 }
 
-export default function SourceCard({ source }: SourceCardProps) {
+export default function SourceCard({ source, onClick }: SourceCardProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className="group relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/80 p-3 hover:border-cyan-500/40 hover:bg-zinc-900/90 transition-all duration-300 shadow-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] flex items-center justify-between gap-3"
     >
       {/* Subtle hover gradient background */}

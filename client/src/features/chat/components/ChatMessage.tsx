@@ -3,6 +3,8 @@ import type { Message, MessageSource } from "../types/conversation.types";
 import SourceCard from "./SourceCard";
 import { motion } from "framer-motion";
 import { Sparkles, User, BookOpen } from "lucide-react";
+import { useState } from "react";
+import PdfViewerModal from "./PdfViewerModal";
 
 interface ChatMessageProps {
   message: Message;
@@ -11,6 +13,9 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ message, streaming }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const [selectedSource, setSelectedSource] = useState<MessageSource | null>(
+    null,
+  );
 
   return (
     <motion.div
@@ -70,12 +75,22 @@ export default function ChatMessage({ message, streaming }: ChatMessageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {message.sources.map((source: MessageSource, index: number) => (
-                <SourceCard key={index} source={source} />
+                <SourceCard
+                  key={index}
+                  source={source}
+                  onClick={() => setSelectedSource(source)}
+                />
               ))}
             </div>
           </div>
         )}
       </div>
+      <PdfViewerModal
+        open={!!selectedSource}
+        onClose={() => setSelectedSource(null)}
+        documentId={selectedSource?.documentId || ""}
+        pageNumber={selectedSource?.pageNumber || 1}
+      />
     </motion.div>
   );
 }

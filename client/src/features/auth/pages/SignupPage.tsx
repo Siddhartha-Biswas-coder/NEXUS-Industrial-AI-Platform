@@ -18,7 +18,6 @@ import { useAuth } from "../hooks/useAuth";
 const SignupPage = () => {
   const { signupUser, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
