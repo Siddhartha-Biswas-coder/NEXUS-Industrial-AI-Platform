@@ -11,3 +11,7 @@ export const createConversationSchema = z.object({
 export const updateConversationSchema = z.object({
     title: z.string().trim().min(1).max(100)
 })
+
+export const updateConversationDocumentSchema = z.object({
+    activeDocuments: z.array(z.string().length(24))
+})

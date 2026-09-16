@@ -18,10 +18,10 @@ const envSchema = z.object({
         .string()
         .default("7d"),
 
-    EBEDDINGS_IP_ADDRESS: z
+    EMBEDDINGS_IP_ADDRESS: z
         .string()
         .default("127.0.0.1"),
-    EBEDDINGS_PORT: z
+    EMBEDDINGS_PORT: z
         .coerce.number()
         .default(8000),
 
@@ -55,8 +55,8 @@ const envData = {
 
     JWT_ACCESS_TOKEN_EXPIRY: process.env.JWT_ACCESS_TOKEN_EXPIRY,
 
-    EBEDDINGS_IP_ADDRESS: process.env.EBEDDINGS_IP_ADDRESS,
-    EBEDDINGS_PORT: process.env.EBEDDINGS_PORT,
+    EMBEDDINGS_IP_ADDRESS: process.env.EMBEDDINGS_IP_ADDRESS,
+    EMBEDDINGS_PORT: process.env.EMBEDDINGS_PORT,
 
     PINECONE_API_KEY: process.env.PINECONE_API_KEY,
 

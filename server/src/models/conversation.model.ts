@@ -20,6 +20,13 @@ const conversationSchema = new mongoose.Schema(
             index: true,
         },
 
+        activeDocuments: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Document",
+            }
+        ],
+
         lastMessageAt: {
             type: Date,
             default: Date.now,

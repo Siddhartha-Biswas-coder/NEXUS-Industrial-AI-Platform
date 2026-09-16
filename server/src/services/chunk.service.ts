@@ -1,4 +1,5 @@
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import type { Document } from "@langchain/core/documents";
 import ChunkModel from "../models/chunk.model.ts";
 
 const splitter = new RecursiveCharacterTextSplitter({
@@ -6,44 +7,53 @@ const splitter = new RecursiveCharacterTextSplitter({
     chunkOverlap: 200,
 });
 
-interface ChunkData {
-    chunkIndex: number;
-    content: string;
-    characterCount: number;
-    pageNumber: number
+export interface PageText {
+  pageNumber: number;
+  text: string;
 }
 
+export interface ProcessedChunk {
+  chunkIndex: number;
+  content: string;
+  characterCount: number;
+  pageNumber: number;
+}
 
-export const splitTextIntoChunks = async (pageTexts: string[]): Promise<ChunkData[]> => {
-    const chunks: ChunkData[] = [];
-    let chunkIndex = 0;
+export const splitTextIntoChunks = async (
+  pageTexts: PageText[]
+): Promise<ProcessedChunk[]> => {
+  const chunks: ProcessedChunk[] = [];
 
-    for (let page = 0; page < pageTexts.length; page++) {
-        const pageChunks = await splitter.splitText(pageTexts[page]);
+  for (const page of pageTexts) {
+    if (!page.text || page.text.trim().length === 0) continue;
 
-        for (const content of pageChunks) {
-            chunks.push({
-                chunkIndex: chunkIndex++,
-                content,
-                characterCount: content.length,
-                pageNumber: page + 1,
-            })
-        }
+    const docs = await splitter.createDocuments([page.text]);
+
+    const baseIndex = chunks.length;
+    for (let index = 0; index < docs.length; index++) {
+      const doc: Document = docs[index];
+      chunks.push({
+        chunkIndex: baseIndex + index,
+        content: doc.pageContent,
+        characterCount: doc.pageContent.length,
+        pageNumber: page.pageNumber,
+      });
     }
+  }
 
-    return chunks;
-}
+  return chunks;
+};
 
 export const saveChunks = async (
     documentId: string,
     ownerId: string,
-    chunks: ChunkData[]
+    chunks: Awaited<ReturnType<typeof splitTextIntoChunks>>
 ) => {
-    const chunkDocs = chunks.map(chunk => ({
+    const chunkDocs = chunks.map((chunk) => ({
         document: documentId,
         owner: ownerId,
-        ...chunk
-    }))
+        ...chunk,
+    }));
 
     return await ChunkModel.insertMany(chunkDocs);
-}
+};

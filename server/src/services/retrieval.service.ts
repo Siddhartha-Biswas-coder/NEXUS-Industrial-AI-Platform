@@ -16,24 +16,33 @@ const parseNumber = (val: unknown): number | undefined => {
     return Number.isNaN(num) ? undefined : num;
 };
 
-export const retrievedRelevantChunks = async (question: string,
+export const retrievedRelevantChunks = async (
+    question: string,
     userId: string,
+    activeDocuments: string[] = [],
     topK = 5
 ): Promise<RetrievedChunk[]> => {
 
     // Generate embedding for the user's question
     const vector = await generateEmbedding(question);
 
+    const filter =
+        activeDocuments.length > 0
+            ? {
+                ownerId: userId,
+                documentId: { $in: activeDocuments },
+            }
+            : {
+                ownerId: userId,
+            }
+
     // Search Pinecone
     const results = await pineconeIndex.query({
         vector,
         topK,
         includeMetadata: true,
-        filter: {
-            ownerId: userId,
-        },
-    }
-    );
+        filter,
+    });
 
     return (results.matches ?? []).filter((match) => {
         const metadata = match.metadata;

@@ -2,8 +2,8 @@ import { Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler.ts";
 import type { AuthRequest } from "../middlewares/auth.middleware.ts";
 import ApiResponse from "../utils/ApiResponse.ts";
-import { createConversation, deleteConversation, getConversations, getMessages, updateConversationTitle } from "../services/conversation.service.ts";
-import { conversationParamsSchema, createConversationSchema, updateConversationSchema } from "../validators/conversation.validator.ts";
+import { createConversation, deleteConversation, getConversations, getMessages, updateConversationActiveDocuments, updateConversationTitle } from "../services/conversation.service.ts";
+import { conversationParamsSchema, createConversationSchema, updateConversationDocumentSchema, updateConversationSchema } from "../validators/conversation.validator.ts";
 
 export const createConversationController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
@@ -94,6 +94,27 @@ export const deleteConversationController = asyncHandler(
                 200,
                 conversation,
                 "Conversation deleted successfully"
+            )
+        )
+    }
+)
+
+export const updateConversationActiveDocumentsController = asyncHandler(
+    async (req: AuthRequest, res: Response) => {
+        const { activeDocuments } = updateConversationDocumentSchema.parse(req.body)
+        const { conversationId } = conversationParamsSchema.parse(req.params)
+
+        const conversation = await updateConversationActiveDocuments({
+            conversationId,
+            userId: req.user!.id,
+            activeDocuments,
+        });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                conversation,
+                "Active documents updated successfully"
             )
         )
     }

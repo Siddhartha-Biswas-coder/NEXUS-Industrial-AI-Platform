@@ -71,7 +71,11 @@ export const askQuestion = async ({
   }
 
   // Retrieve relevant chunks
-  const matches = await retrievedRelevantChunks(question, userId);
+  const matches = await retrievedRelevantChunks(
+    question,
+    userId,
+    conversation.activeDocuments?.map((id) => id.toString()) ?? []
+  );
 
   const bestScore = matches[0]?.score ?? 0;
   const useRAG = bestScore >= config.RAG_THRESHOLD
@@ -157,7 +161,11 @@ export const askQuestionStream = async ({
     await conversation.save();
   }
 
-  const matches = await retrievedRelevantChunks(question, userId);
+  const matches = await retrievedRelevantChunks(
+    question,
+    userId,
+    conversation.activeDocuments?.map((id) => id.toString()) ?? []
+  );
 
   const bestScore = matches[0]?.score ?? 0;
   const useRAG = bestScore >= config.RAG_THRESHOLD;

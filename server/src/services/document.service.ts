@@ -3,6 +3,8 @@ import DocumentModel from "../models/document.model.ts";
 import { splitTextIntoChunks, saveChunks } from "./chunk.service.ts";
 import { extractPdfText } from "./pdf.service.ts";
 import { indexChunks } from "./vector.service.ts";
+import fs from "fs/promises";
+import ChunkModel from "../models/chunk.model.ts";
 
 interface UploadData {
     title: string;
@@ -38,10 +40,20 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
         // Step 4: Split text into chunks
         const chunks = await splitTextIntoChunks(parsed.pageTexts);
 
-        // Step 5: Save chunks to MongoDB
-        await saveChunks(document.id, userId, chunks);
+        const validChunks = chunks.filter(
+            (chunk) => chunk.content.trim().length > 0
+        )
 
-        await indexChunks(document.id, document.title, userId, chunks)
+        if (validChunks.length === 0) {
+            throw new Error(
+                "This PDF contains no extractable text. Please upload a searchable PDF or enable OCR."
+            );
+        }
+
+        // Step 5: Save chunks to MongoDB
+        await saveChunks(document.id, userId, validChunks);
+
+        await indexChunks(document.id, document.title, userId, validChunks)
 
         // Step 6: Mark document as indexed
         document.status = "indexed";
@@ -50,8 +62,15 @@ export const uploadDocumentService = async ({ title, file, userId }: UploadData)
 
         return document;
     } catch (error) {
-        document.status = "failed";
-        await document.save()
+        // Delete uploaded file from disk
+        await fs.unlink(file.path).catch(() => { });
+
+        // Remove any chunks that may have been created
+        await ChunkModel.deleteMany({ document: document._id });
+
+        // Remove the document itself
+        await document.deleteOne();
+
         throw error;
     }
 

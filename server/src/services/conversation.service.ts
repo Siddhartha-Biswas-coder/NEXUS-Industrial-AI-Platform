@@ -4,6 +4,7 @@ import MessageModel from "../models/message.model.ts";
 interface CreateConversationData {
     userId: string;
     title?: string;
+    activeDocuments?: string[];
 }
 
 interface GetConversationsData {
@@ -21,6 +22,12 @@ interface UpdateConversationData {
     title: string;
 }
 
+interface UpdateActiveDocumentsData {
+    conversationId: string;
+    userId: string;
+    activeDocuments: string[];
+}
+
 interface DeleteConversationData {
     conversationId: string;
     userId: string;
@@ -29,10 +36,12 @@ interface DeleteConversationData {
 export const createConversation = async ({
     userId,
     title,
+    activeDocuments,
 }: CreateConversationData) => {
     return ConversationModel.create({
         owner: userId,
         title: title ?? "New Conversation",
+        activeDocuments: activeDocuments ?? [],
     });
 };
 
@@ -42,7 +51,7 @@ export const getConversations = async ({
     return ConversationModel.find({
         owner: userId
     }).sort({ lastMessageAt: -1 })
-        .select("_id title lastMessageAt createdAt")
+        .select("_id title activeDocuments lastMessageAt createdAt")
 }
 
 export const getMessages = async ({
@@ -109,5 +118,32 @@ export const deleteConversation = async ({
     await conversation.deleteOne()
 
     return conversation
+}
+
+export const updateConversationActiveDocuments = async ({
+    conversationId,
+    userId,
+    activeDocuments
+}: UpdateActiveDocumentsData) => {
+    const conversation = await ConversationModel.findOneAndUpdate(
+        {
+            _id: conversationId,
+            owner: userId,
+        },
+        {
+            activeDocuments
+        },
+        {
+            new: true
+        }
+    )
+        .populate("activeDocuments", "_id title")
+        .select("_id title activeDocuments lastMessageAt createdAt")
+
+    if (!conversation) {
+        throw new Error("Conversation not found");
+    }
+
+    return conversation;
 }
 

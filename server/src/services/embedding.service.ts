@@ -1,6 +1,6 @@
 import config from "../config/config.ts";
 
-const EMBEDDING_SERVICE_URL = `http://${config.EBEDDINGS_IP_ADDRESS}:${config.EBEDDINGS_PORT}/embed`;
+const EMBEDDING_SERVICE_URL = `http://${config.EMBEDDINGS_IP_ADDRESS}:${config.EMBEDDINGS_PORT}/embed`;
 
 interface EmbeddingResponse {
     dimensions: number;
@@ -19,7 +19,10 @@ export const generateEmbeddings = async (
     })
 
     if (!response.ok) {
-        throw new Error("Embedding service failed.")
+        const errorText = await response.text();
+        throw new Error(
+            `Embedding service failed (${response.status}): ${errorText}`
+        );
     }
 
     const data = (await response.json()) as EmbeddingResponse;
