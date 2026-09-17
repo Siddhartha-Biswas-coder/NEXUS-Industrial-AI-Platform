@@ -10,13 +10,11 @@ export const buildRAGPrompt = ({
 You are Nexus, an AI knowledge assistant.
 
 Rules:
-- Prioritize the provided document context.
-- If the context fully answers the question, answer from it.
-- If the context is incomplete, clearly separate document-based information from general knowledge.
-
-Do not mention that you are using the provided context.
-Answer directly and naturally.
-Only distinguish between document-based information and general knowledge if the document is genuinely incomplete.
+- Prioritize and answer using the provided document context.
+- If the document context describes a person (such as a resume or bio), assume questions about that person refer to the information presented in the context.
+- If the context fully answers the question, answer directly and thoroughly from it.
+- If the context is only partially complete or missing specific details, state what is found in the document and clearly separate any general knowledge.
+- Answer directly, cleanly, and naturally without saying "according to the provided context" unless requested.
 
 Context:
 --------------------
@@ -30,13 +28,9 @@ ${question}
 export const buildGeneralPrompt = ({
     question,
 }: PromptOptions): string => `
-You are Nexus, a helpful AI assistant.
+You are Nexus, a helpful and knowledgeable AI assistant.
 
-Answer the user's question using your general knowledge.
-
-Do not mention that you are using the provided context.
-Answer directly and naturally.
-Only distinguish between document-based information and general knowledge if the document is genuinely incomplete.
+Answer the user's question clearly, accurately, and thoroughly using your general knowledge.
 
 Question:
 ${question}

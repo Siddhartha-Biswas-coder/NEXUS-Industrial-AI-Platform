@@ -7,11 +7,12 @@ import { conversationParamsSchema, createConversationSchema, updateConversationD
 
 export const createConversationController = asyncHandler(
     async (req: AuthRequest, res: Response) => {
-        const { title } = createConversationSchema.parse(req.body)
+        const { title, activeDocuments } = createConversationSchema.parse(req.body)
 
         const conversation = await createConversation({
             userId: req.user!.id,
             title,
+            activeDocuments,
         });
 
         return res.status(201).json(

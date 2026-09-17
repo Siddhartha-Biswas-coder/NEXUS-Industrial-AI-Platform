@@ -20,21 +20,19 @@ export const retrievedRelevantChunks = async (
     question: string,
     userId: string,
     activeDocuments: string[] = [],
-    topK = 5
+    topK = 8
 ): Promise<RetrievedChunk[]> => {
+    if (!activeDocuments || activeDocuments.length === 0) {
+        return [];
+    }
 
     // Generate embedding for the user's question
     const vector = await generateEmbedding(question);
 
-    const filter =
-        activeDocuments.length > 0
-            ? {
-                ownerId: userId,
-                documentId: { $in: activeDocuments },
-            }
-            : {
-                ownerId: userId,
-            }
+    const filter = {
+        ownerId: userId,
+        documentId: { $in: activeDocuments },
+    };
 
     // Search Pinecone
     const results = await pineconeIndex.query({
@@ -44,19 +42,14 @@ export const retrievedRelevantChunks = async (
         filter,
     });
 
-    return (results.matches ?? []).filter((match) => {
-        const metadata = match.metadata;
-        return (
-            metadata?.documentId &&
-            metadata?.documentTitle &&
-            metadata?.pageNumber != null
-        )
-    }).map((match) => ({
-        documentId: String(match.metadata?.documentId ?? ""),
-        documentTitle: String(match.metadata?.documentTitle ?? ""),
-        chunkIndex: parseNumber(match.metadata?.chunkIndex) ?? 0,
-        pageNumber: parseNumber(match.metadata?.pageNumber),
-        content: String(match.metadata?.content ?? ""),
-        score: match.score ?? 0,
-    }));
+    return (results.matches ?? [])
+        .filter((match) => Boolean(match.metadata?.content))
+        .map((match) => ({
+            documentId: String(match.metadata?.documentId ?? ""),
+            documentTitle: String(match.metadata?.documentTitle ?? "Document"),
+            chunkIndex: parseNumber(match.metadata?.chunkIndex) ?? 0,
+            pageNumber: parseNumber(match.metadata?.pageNumber),
+            content: String(match.metadata?.content ?? ""),
+            score: match.score ?? 0,
+        }));
 }

@@ -5,8 +5,9 @@ export const conversationParamsSchema = z.object({
 });
 
 export const createConversationSchema = z.object({
-    title: z.string().trim().min(1).max(100).optional()
-})
+    title: z.string().trim().min(1).max(100).optional(),
+    activeDocuments: z.array(z.string().length(24)).optional(),
+});
 
 export const updateConversationSchema = z.object({
     title: z.string().trim().min(1).max(100)

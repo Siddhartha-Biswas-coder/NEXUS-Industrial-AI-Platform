@@ -7,9 +7,14 @@ import SendButton from "./SendButton";
 interface ChatInputProps {
   sendMessage: (question: string, conversationId?: string) => Promise<void>;
   loading: boolean;
+  draftActiveDocuments?: string[] | null;
 }
 
-export default function ChatInput({ sendMessage, loading }: ChatInputProps) {
+export default function ChatInput({
+  sendMessage,
+  loading,
+  draftActiveDocuments,
+}: ChatInputProps) {
   const [question, setQuestion] = useState("");
   const navigate = useNavigate();
   const { activeConversation, createNewConversation } = useConversations();
@@ -24,7 +29,10 @@ export default function ChatInput({ sendMessage, loading }: ChatInputProps) {
       let conversationId = activeConversation?._id;
 
       if (!conversationId) {
-        const conversation = await createNewConversation(text);
+        const conversation = await createNewConversation(
+          text,
+          draftActiveDocuments ?? undefined
+        );
         conversationId = conversation._id;
         navigate(`/chat/${conversationId}`, { replace: true });
       }

@@ -1,4 +1,5 @@
 import ConversationModel from "../models/conversation.model.ts";
+import DocumentModel from "../models/document.model.ts";
 import MessageModel from "../models/message.model.ts";
 
 interface CreateConversationData {
@@ -143,6 +144,8 @@ export const updateConversationActiveDocuments = async ({
     if (!conversation) {
         throw new Error("Conversation not found");
     }
+
+    conversation.activeDocuments = conversation.activeDocuments.filter(Boolean)
 
     return conversation;
 }

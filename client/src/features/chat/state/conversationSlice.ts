@@ -76,15 +76,25 @@ const conversationSlice = createSlice({
             state.generating = action.payload;
         },
 
-        updateConversation(state, action: PayloadAction<Conversation>) {
+        updateConversation(state, action: PayloadAction<Partial<Conversation> & { _id: string }>) {
             state.conversations = state.conversations.map((conversation) =>
-                conversation._id == action.payload._id
-                    ? action.payload
+                conversation._id === action.payload._id
+                    ? {
+                        ...conversation,
+                        ...action.payload,
+                        activeDocuments:
+                            action.payload.activeDocuments ?? conversation.activeDocuments,
+                    }
                     : conversation
-            )
+            );
 
-            if (state.activeConversation?._id == action.payload._id) {
-                state.activeConversation = action.payload
+            if (state.activeConversation?._id === action.payload._id) {
+                state.activeConversation = {
+                    ...state.activeConversation,
+                    ...action.payload,
+                    activeDocuments:
+                        action.payload.activeDocuments ?? state.activeConversation.activeDocuments,
+                };
             }
         },
 
@@ -114,7 +124,23 @@ const conversationSlice = createSlice({
 
         setStreaming(state, action: PayloadAction<boolean>) {
             state.streaming = action.payload
-        }
+        },
+
+        setActiveDocuments(state, action) {
+            const { conversationId, activeDocuments } = action.payload;
+
+            const conversation = state.conversations.find(
+                (c) => c._id === conversationId
+            );
+
+            if (conversation) {
+                conversation.activeDocuments = activeDocuments;
+            }
+
+            if (state.activeConversation?._id === conversationId) {
+                state.activeConversation.activeDocuments = activeDocuments
+            }
+        },
     },
 });
 
@@ -130,7 +156,8 @@ export const {
     appendToLastAssistantMessage,
     updateLastAssistantMessage,
     updateLastAssistantResponseType,
-    setStreaming
+    setStreaming,
+    setActiveDocuments
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

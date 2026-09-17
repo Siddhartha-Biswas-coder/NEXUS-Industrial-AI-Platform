@@ -1,12 +1,13 @@
-import api from "../../../shared/lib/axios";
+import api from "@/shared/lib/axios";
 
 export interface Document {
-    id: string;
+    _id: string;
     title: string;
     originalName: string;
     fileSize: number;
     status: "uploaded" | "processing" | "indexed";
     createdAt: string;
+    pageCount?: number;
 }
 
 export const getDocumentsService = async (): Promise<Document[]> => {

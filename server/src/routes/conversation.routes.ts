@@ -12,7 +12,7 @@ router.get("/:conversationId/messages", authMiddleware, getMessagesController);
 
 router.patch("/:conversationId", authMiddleware, updateConversationTitleController)
 
-router.patch("/:conversationId/documents", authMiddleware, updateConversationActiveDocumentsController)
+router.patch("/:conversationId/active-documents", authMiddleware, updateConversationActiveDocumentsController)
 
 router.delete("/:conversationId", authMiddleware, deleteConversationController)
 

@@ -1,4 +1,3 @@
-import { Metadata } from "pdf-parse";
 import { pineconeIndex } from "../config/pinecone.ts";
 import { generateEmbeddings } from "./embedding.service.ts";
 
@@ -14,8 +13,9 @@ export const indexChunks = async (
     ownerId: string,
     chunks: ChunkData[]
 ) => {
+    const titlePrefix = documentTitle?.trim() ? `Document: ${documentTitle.trim()}\n` : "";
     const embeddings = await generateEmbeddings(
-        chunks.map((chunk) => chunk.content)
+        chunks.map((chunk) => `${titlePrefix}${chunk.content}`)
     )
 
     const vectors = chunks.map((chunk, index) => ({

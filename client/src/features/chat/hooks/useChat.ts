@@ -100,7 +100,8 @@ export default function useChat() {
         loadingHistory,
         generating,
         streaming,
-        sendMessage
+        sendMessage,
+        activeConversation
     }
 }
 

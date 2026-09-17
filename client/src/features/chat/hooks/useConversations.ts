@@ -62,25 +62,26 @@ export default function useConversations() {
     [dispatch]
   );
 
-  const createNewConversation = useCallback(async (title?: string) => {
-    dispatch(setLoadingHistory(true));
+  const createNewConversation = useCallback(
+    async (title?: string, activeDocuments?: string[]) => {
+      dispatch(setLoadingHistory(true));
 
-    try {
-      const conversation = await createConversation(title);
+      try {
+        const conversation = await createConversation(title, activeDocuments);
 
-      dispatch(
-        setConversations([conversation, ...conversations])
-      );
+        dispatch(setConversations([conversation, ...conversations]));
 
-      dispatch(setActiveConversation(conversation));
+        dispatch(setActiveConversation(conversation));
 
-      dispatch(setMessages([]));
+        dispatch(setMessages([]));
 
-      return conversation;
-    } finally {
-      dispatch(setLoadingHistory(false));
-    }
-  }, [dispatch, conversations]);
+        return conversation;
+      } finally {
+        dispatch(setLoadingHistory(false));
+      }
+    },
+    [dispatch, conversations]
+  );
 
   const renameConversationById = useCallback(
     async (conversationId: string, title: string) => {

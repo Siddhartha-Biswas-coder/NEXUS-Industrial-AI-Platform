@@ -9,11 +9,17 @@ export interface Message {
     responseType?: ResponseType
 }
 
+export interface ActiveDocument {
+    _id: string;
+    title: string;
+}
+
 export interface Conversation {
     _id: string;
     title: string;
     lastMessageAt: string;
     createdAt: string;
+    activeDocuments: ActiveDocument[]
 }
 
 export interface MessageSource {

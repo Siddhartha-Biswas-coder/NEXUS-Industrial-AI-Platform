@@ -39,7 +39,7 @@ const envSchema = z.object({
 
     LLM_MODEL: z.string().default("llama3.2:3b"),
 
-    RAG_THRESHOLD: z.coerce.number().default(0.45),
+    RAG_THRESHOLD: z.coerce.number().default(0.25),
 })
 
 const envData = {
