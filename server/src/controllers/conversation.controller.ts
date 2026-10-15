@@ -90,10 +90,20 @@ export const deleteConversationController = asyncHandler(
             userId: req.user!.id,
         })
 
+        if (!conversation) {
+            return res.status(404).json(
+                new ApiResponse(
+                    404,
+                    null,
+                    "Conversation not found",
+                ),
+            );
+        }
+
         return res.status(200).json(
             new ApiResponse(
                 200,
-                conversation,
+                null,
                 "Conversation deleted successfully"
             )
         )

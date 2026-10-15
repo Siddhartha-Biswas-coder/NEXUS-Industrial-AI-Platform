@@ -39,10 +39,25 @@ export const createConversation = async ({
     title,
     activeDocuments,
 }: CreateConversationData) => {
+    const uniqueDocumentIds = [...new Set(activeDocuments ?? [])];
+
+    if (uniqueDocumentIds.length > 0) {
+        const ownedDocuments = await DocumentModel.find({
+            _id: { $in: uniqueDocumentIds },
+            owner: userId,
+        }).select("_id");
+
+        if (ownedDocuments.length !== uniqueDocumentIds.length) {
+            throw new Error(
+                "One or more selected documents were not found or are not accessible.",
+            )
+        }
+    }
+
     return ConversationModel.create({
         owner: userId,
         title: title ?? "New Conversation",
-        activeDocuments: activeDocuments ?? [],
+        activeDocuments: uniqueDocumentIds as any[],
     });
 };
 
@@ -126,27 +141,37 @@ export const updateConversationActiveDocuments = async ({
     userId,
     activeDocuments
 }: UpdateActiveDocumentsData) => {
-    const conversation = await ConversationModel.findOneAndUpdate(
-        {
-            _id: conversationId,
-            owner: userId,
-        },
-        {
-            activeDocuments
-        },
-        {
-            new: true
-        }
-    )
-        .populate("activeDocuments", "_id title")
-        .select("_id title activeDocuments lastMessageAt createdAt")
+
+    const conversation = await ConversationModel.findOne({
+        _id: conversationId,
+        owner: userId,
+    })
 
     if (!conversation) {
-        throw new Error("Conversation not found");
+        throw new Error("Conversation not found")
     }
 
-    conversation.activeDocuments = conversation.activeDocuments.filter(Boolean)
+    const uniqueDocumentIds = [...new Set(activeDocuments)];
+
+    if (uniqueDocumentIds.length > 0) {
+        const ownerDocuments = await DocumentModel.find({
+            _id: { $in: uniqueDocumentIds },
+            owner: userId,
+        }).select("_id")
+
+        if (ownerDocuments.length !== uniqueDocumentIds.length) {
+            throw new Error(
+                "One or more selected documents were not found or are not accessible.",
+            )
+        }
+    }
+
+    conversation.activeDocuments = uniqueDocumentIds as any[];
+    await conversation.save();
+
+    await conversation.populate("activeDocuments", "_id title");
 
     return conversation;
+
 }
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "dev": "tsx watch server.ts",
     "start": "node dist/app.js"
   },
@@ -42,6 +42,7 @@
     "@types/pdf-parse": "^1.1.5",
     "nodemon": "^3.1.14",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   }
 }

@@ -43,6 +43,7 @@ interface ChatData {
   conversationId: string;
   question: string;
   userId: string;
+  signal?: AbortSignal;
 }
 
 const getActiveDocumentIds = (activeDocs?: any[]): string[] => {
@@ -66,7 +67,10 @@ export const askQuestion = async ({
   question,
   userId,
 }: ChatData): Promise<ChatResponse> => {
-  const conversation = await ConversationModel.findById(conversationId);
+  const conversation = await ConversationModel.findOne({
+    _id: conversationId,
+    owner: userId,
+  });
 
   if (!conversation) {
     throw new Error("Conversation not found.");
@@ -159,8 +163,12 @@ export const askQuestionStream = async ({
   conversationId,
   question,
   userId,
+  signal,
 }: ChatData): Promise<StreamChatResponse> => {
-  const conversation = await ConversationModel.findById(conversationId);
+  const conversation = await ConversationModel.findOne({
+    _id: conversationId,
+    owner: userId,
+  });
 
   if (!conversation) {
     throw new Error("Conversation not found.");
@@ -222,7 +230,7 @@ export const askQuestionStream = async ({
     : [];
 
   return {
-    stream: llm.streamGenerate({ prompt }),
+    stream: llm.streamGenerate({ prompt, signal }),
     conversation: {
       _id: conversation.id,
       title: conversation.title,

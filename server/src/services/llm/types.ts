@@ -1,5 +1,6 @@
 export interface GenerateOptions {
-    prompt: string
+    prompt: string;
+    signal?: AbortSignal;
 }
 
 export interface LLMProvider {
